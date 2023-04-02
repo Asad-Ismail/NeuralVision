@@ -1,4 +1,4 @@
-/* Basic styling for the NeuralVision page */
+/* Basic styling for the PixelVisionX page */
 body {
     font-family: Arial, sans-serif;
     line-height: 1.6;
@@ -22,7 +22,7 @@ body {
     padding: 1rem;
   }
   
-  .intro {
+  .Intro {
     background-color: #fff;
     padding: 2rem;
     margin-bottom: 2rem;
@@ -31,7 +31,28 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    height: calc(100vh - 80px); /* Set the height of the section to the height of the viewport minus the header height and some padding */
+    height: calc(100vh - 80px);
+  }
+  
+  .btn-excite {
+    background-color: #ff5722;
+    color: #fff;
+    font-size: 24px;
+    padding: 16px 48px;
+    border-radius: 50px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    border: none;
+    text-shadow: 0px 1px 1px rgba(0, 0, 0, 0.2);
+    outline: none;
+  }
+  
+  .btn-excite:hover {
+    background-color: #fff;
+    color: #ff5722;
+    transform: scale(1.1);
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
   }
   
   .features {
@@ -40,16 +61,34 @@ body {
     gap: 2rem;
   }
   
+  .feature-card {
+    background-color: #fff;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    padding: 2rem;
+  }
+  
+  .feature-card img {
+    width: 100%;
+    height: auto;
+    margin-bottom: 1rem;
+  }
+  
+  .feature-card h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .feature-card p {
+    margin: 0;
+    font-size: 1.1rem;
+  }
+   
   footer {
     text-align: center;
     padding: 1rem;
     background-color: #333;
     color: #fff;
     margin-top: 1rem;
-  }
-  
-  .btn-large {
-    font-size: 24px;
-    padding: 16px 24px;
   }
   

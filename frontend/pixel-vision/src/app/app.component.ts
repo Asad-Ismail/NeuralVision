@@ -6,5 +6,9 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.css'],
 })
 export class AppComponent {
+  startProject() {
+    // Add functionality to start a new project here
+  }
   title = 'PixelVisionX';
+  
 }
