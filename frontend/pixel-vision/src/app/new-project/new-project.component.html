@@ -1,5 +1,9 @@
-<form>
-    <input type="file" multiple (change)="onFileSelected($event)">
-    <button type="submit" (click)="startTraining()">Start Training</button>
-  </form>
-  
+<div>
+    <h2>Self-Supervised Learning Training</h2>
+    <p>Upload images to start training your self-supervised learning model using the MoCo algorithm from PyTorch Lightning.</p>
+    <form>
+      <label for="fileInput">Select image files:</label>
+      <input type="file" id="fileInput" #fileInput multiple (change)="onFileSelected(fileInput)">
+      <button type="submit" (click)="startTraining()">Start Training</button>
+    </form>
+  </div>
