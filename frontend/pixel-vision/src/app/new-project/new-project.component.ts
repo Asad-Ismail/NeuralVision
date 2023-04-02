@@ -11,6 +11,7 @@ import { HttpClient } from '@angular/common/http';
 export class NewProjectComponent 
 
 {
+  
   constructor(private http: HttpClient) {}
   
   files: File[] = [];
@@ -31,5 +32,5 @@ export class NewProjectComponent
       );
     }
   }
-  
+
 }  

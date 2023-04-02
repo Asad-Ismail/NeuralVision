@@ -12,7 +12,7 @@ export class AppComponent {
 
   startProject() 
   {
-    this.router.navigate(['/start-project']);
+    this.router.navigate(['/new-project']);
   }
   title = 'PixelVisionX';
 }
