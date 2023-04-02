@@ -7,7 +7,7 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   startProject() {
-    // Add functionality to start a new project here
+    window.location.href = 'newproject.html';
   }
   title = 'PixelVisionX';
 }
