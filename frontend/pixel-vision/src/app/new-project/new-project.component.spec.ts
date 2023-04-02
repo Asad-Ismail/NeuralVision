@@ -51,5 +51,4 @@ export class NewProjectComponent implements OnInit {
       alert('Error during training. Please try again later.');
     });
   }
-
 }
