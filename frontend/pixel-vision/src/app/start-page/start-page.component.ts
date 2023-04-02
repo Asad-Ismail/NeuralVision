@@ -7,7 +7,11 @@ import { Router } from '@angular/router';
   styleUrls: ['./start-page.component.css']
 })
 export class StartPageComponent {
-  constructor(private router: Router) {}
+  constructor(private router: Router) {
+    
+    console.log("Second");
+
+  }
   newProject() 
   {
     this.router.navigate(['/new-project']);

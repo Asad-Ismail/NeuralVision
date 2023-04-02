@@ -8,11 +8,8 @@ import { Router } from '@angular/router';
 })
 
 export class AppComponent {
-  constructor(private router: Router) {}
-
-  startProject() 
-  {
-    this.router.navigate(['/new-project']);
+  constructor() {
+    console.log("First");
   }
   title = 'PixelVisionX';
 }
