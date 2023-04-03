@@ -12,12 +12,12 @@ export class NewProjectComponent
 
 {
 
-  constructor() {
-    console.log("Third");
-  }
-  
+  constructor(private http: HttpClient) {}
 
   startTraining() {
+    this.http.get('http://localhost:5000/api/start_training').subscribe(data => {
+      console.log(data);
+    });
   }
 
 }  
