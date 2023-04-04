@@ -1,19 +1,25 @@
-import matplotlib.pyplot as plt
-import numpy as np
-import random
 import json
-from time import sleep
+import time
+import os
 
+def train():
 
-if __name__=="__main__":
-    for epoch in range(1000):
-        # Create a JSON-formatted log
-        loss = round(random.uniform(0.1, 1.0), 4)
-        log = {
-            "epoch": epoch,
-            "loss": loss
-        }
+    if os.path.exists("training_data.json"):
+        os.remove("training_data.json")
 
-        # Print the JSON-formatted log
-        sleep(1)
-        print(json.dumps(log))
+    # Simulate training by generating random loss values
+    for epoch in range(1, 1000):
+        loss = 1 - epoch / 10
+        metric = {'epoch': epoch, 'loss': loss}
+        with open('training_data.json', 'a') as f:
+            f.write(json.dumps(metric) + '\n')
+        time.sleep(1)
+
+    # Write the stop word at the end of the file
+    with open('training_data.json', 'a') as f:
+        f.write('{"Training completed": true}\n')
+    #with open('training_data.json', 'a') as f:
+    #    f.write('{"stop": true}\n')
+
+if __name__ == '__main__':
+    train()

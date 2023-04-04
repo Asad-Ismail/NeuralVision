@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, NgZone } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { ChartDataset, ChartOptions } from 'chart.js';
 import io from 'socket.io-client';
@@ -12,7 +12,6 @@ export class NewProjectComponent implements OnInit, OnDestroy {
   logs: string = '';
   metrics: any[] = [];
   trainingStarted: boolean = false;
-  public changeTrigger = 0;
 
   private socket: any;
 
@@ -29,14 +28,15 @@ export class NewProjectComponent implements OnInit, OnDestroy {
   public lineChartLegend = true;
   public lineChartType: 'line' = 'line';
   public lineChartPlugins = [];
+  public changeTrigger= 0;
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private ngZone: NgZone) {
     this.socket = io('http://localhost:5000');
   }
 
   ngOnInit(): void {
     this.socket.on('log', (log: string) => {
-      this.changeTrigger++;
+      // Ignore logs for now
     });
 
     this.socket.on('metric', (metric: any) => {
@@ -58,8 +58,13 @@ export class NewProjectComponent implements OnInit, OnDestroy {
 
   updateChartData(metric: any) {
     // Assuming your metric object has a property called "loss" and another called "epoch"
+    console.log(metric);
     (this.lineChartData[0].data as number[]).push(metric.loss);
     this.lineChartLabels.push(metric.epoch.toString());
-    //console.log(metric);
+    // Use the ngZone service to update the chart in the Angular zone
+    this.ngZone.run(() => {
+      this.lineChartData = [...this.lineChartData];
+      this.lineChartLabels = [...this.lineChartLabels];
+    });
   }
 }

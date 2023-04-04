@@ -6,7 +6,6 @@
   <div *ngIf="trainingStarted" class="chart-container">
     <canvas
         width="1200" height="800" 
-        *ngIf="changeTrigger"
         baseChart
         [datasets]="lineChartData"
         [labels]="lineChartLabels"
