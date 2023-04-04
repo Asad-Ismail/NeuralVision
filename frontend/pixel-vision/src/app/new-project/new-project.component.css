@@ -35,7 +35,11 @@
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
     padding: 2rem;
     margin-top: 2rem;
-    width: 100%;
-    max-width: 800px;
+    width: 800px; /* Set fixed width for the container */
+    height: 400px; /* Set fixed height for the container */
+    overflow-x: auto; /* Enable horizontal scrolling */
 }
+
+
+
 

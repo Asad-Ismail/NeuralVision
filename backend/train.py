@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import random
 import json
+from time import sleep
 
 
 if __name__=="__main__":
@@ -14,4 +15,5 @@ if __name__=="__main__":
         }
 
         # Print the JSON-formatted log
+        sleep(1)
         print(json.dumps(log))
