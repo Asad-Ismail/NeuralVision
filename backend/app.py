@@ -27,12 +27,14 @@ class TrainingDataHandler(FileSystemEventHandler):
                 for line in f:
                     if self.stop_word in line.strip():
                         # Training is completed, stop reading the file
+                        status="Done"
                         break
                     try:
                         metric = json.loads(line.strip())
                         if metric not in self.metrics:
                             self.metrics.append(metric)
                             self.socketio.emit('metric', metric)
+                        status="Training"
                     except ValueError:
                         pass
 
@@ -61,6 +63,17 @@ def start_training():
     read_metrics_from_file(socketio)
 
     return jsonify({'message': 'Training started'}), 200
+
+@app.route('/api/status', methods=['GET'])
+def get_status():
+    # Check the status of the training process here
+    if status==None:
+        log="Training Not Started/Stopped"
+    if status=='Training':
+        log="Training!!"
+    if status=="Done":
+        log="Done!!"
+    return jsonify({'status': log}), 200
 
 if __name__ == '__main__':
     socketio.run(app, debug=True)
