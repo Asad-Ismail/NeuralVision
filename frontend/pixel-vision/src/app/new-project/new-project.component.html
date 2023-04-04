@@ -1,7 +1,11 @@
-<p>Upload images to start training your self-supervised learning model using the MoCo algorithm from PyTorch Lightning.</p>
+<button (click)="startTraining()">Start Training</button>
+<div *ngIf="logs">
+  <h2>Training Logs</h2>
+  <pre>{{ logs }}</pre>
+</div>
 
-<div>
-    <h2>New Project</h2>
-    <p>Click the button below to start training the deep learning model.</p>
-    <button class="btn-primary" (click)="startTraining()">Start Training</button>
+<div *ngIf="metrics">
+  <h2>Training Curve</h2>
+  <canvas baseChart [datasets]="lineChartData" [labels]="lineChartLabels" [options]="lineChartOptions" [colors]="lineChartColors" [legend]="lineChartLegend" [chartType]="lineChartType" [plugins]="lineChartPlugins">
+  </canvas>
 </div>
