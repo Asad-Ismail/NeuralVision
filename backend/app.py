@@ -12,6 +12,8 @@ app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 socketio = SocketIO(app, cors_allowed_origins="*")
 
+status=None
+
 """"This will update training data"""
 class TrainingDataHandler(FileSystemEventHandler):
     def __init__(self, socketio):
@@ -23,7 +25,7 @@ class TrainingDataHandler(FileSystemEventHandler):
         if not event.is_directory and event.src_path.endswith('.json'):
             with open(event.src_path, 'r') as f:
                 for line in f:
-                    if line.strip() == self.stop_word:
+                    if self.stop_word in line.strip():
                         # Training is completed, stop reading the file
                         break
                     try:
@@ -56,7 +58,7 @@ def start_training():
     training_thread = threading.Thread(target=start_training_thread)
     training_thread.start()
     # read logging
-    read_metrics_from_file()
+    read_metrics_from_file(socketio)
 
     return jsonify({'message': 'Training started'}), 200
 
