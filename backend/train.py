@@ -8,7 +8,7 @@ def train():
         os.remove("training_data.json")
 
     # Simulate training by generating random loss values
-    for epoch in range(1, 1000):
+    for epoch in range(1, 50):
         loss = 1- epoch / 10
         metric = {'epoch': epoch, 'loss': loss}
         with open('training_data.json', 'a') as f:

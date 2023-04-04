@@ -22,6 +22,7 @@ class TrainingDataHandler(FileSystemEventHandler):
         self.metrics = []
 
     def on_modified(self, event):
+        global status
         if not event.is_directory and event.src_path.endswith('.json'):
             with open(event.src_path, 'r') as f:
                 for line in f:
@@ -45,7 +46,7 @@ def read_metrics_from_file(socketio):
     observer.start()
     try:
         while True:
-            time.sleep(.1)
+            time.sleep(1)
     except KeyboardInterrupt:
         observer.stop()
     observer.join()
@@ -57,11 +58,12 @@ def start_training_thread():
 
 @app.route('/api/start_training', methods=['GET'])
 def start_training():
+    global status
     training_thread = threading.Thread(target=start_training_thread)
     training_thread.start()
     # read logging
     read_metrics_from_file(socketio)
-
+    status="Training"
     return jsonify({'message': 'Training started'}), 200
 
 @app.route('/api/status', methods=['GET'])

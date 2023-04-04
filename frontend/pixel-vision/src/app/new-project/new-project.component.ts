@@ -28,7 +28,7 @@ export class NewProjectComponent implements OnInit, OnDestroy {
   public lineChartLegend = true;
   public lineChartType: 'line' = 'line';
   public lineChartPlugins = [];
-  public changeTrigger= 0;
+  public trainingStatus: string = '';
 
   constructor(private http: HttpClient, private ngZone: NgZone) {
     this.socket = io('http://localhost:5000');
@@ -43,6 +43,16 @@ export class NewProjectComponent implements OnInit, OnDestroy {
       this.metrics.push(metric);
       this.updateChartData(metric);
     });
+
+    // Periodically update the status
+    setInterval(() => {
+      this.http.get('http://localhost:5000/api/status').subscribe((data: any) => {
+      console.log("Test log ", data)  
+      this.trainingStatus = data.status;
+      });
+    }, 5000); // Update every 5 seconds
+
+
   }
 
   ngOnDestroy(): void {

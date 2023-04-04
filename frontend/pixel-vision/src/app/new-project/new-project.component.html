@@ -2,6 +2,8 @@
     <h1>Training AI Model</h1>
     <button (click)="startTraining()" class="btn-excite">Start Training</button>
   </div>
+
+  
   
   <div *ngIf="trainingStarted" class="chart-container">
     <canvas
@@ -15,5 +17,11 @@
         [plugins]="lineChartPlugins"
     >
     </canvas>
+  </div>
+
+  <div class="status-bar-container">
+    <div class="status-bar">
+      {{ trainingStatus }}
+    </div>
   </div>
   
