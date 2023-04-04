@@ -11,20 +11,22 @@ import io from 'socket.io-client';
 export class NewProjectComponent implements OnInit, OnDestroy {
   logs: string = '';
   metrics: any[] = [];
+  trainingStarted: boolean = false;
 
   private socket: any;
 
-  public lineChartData: ChartDataset[] = [{ data: [], label: 'Training Loss' }];
-  public lineChartLabels: string[] = [];
-  public lineChartOptions: ChartOptions = { responsive: true };
-  public lineChartColors = [
+  public lineChartData: ChartDataset[] = [
     {
+      data: [],
+      label: 'Training Loss',
       borderColor: 'black',
       backgroundColor: 'rgba(255,0,0,0.3)',
     },
   ];
+  public lineChartLabels: string[] = [];
+  public lineChartOptions: ChartOptions = { responsive: true };
   public lineChartLegend = true;
-  public lineChartType = 'line';
+  public lineChartType: 'line' = 'line';
   public lineChartPlugins = [];
 
   constructor(private http: HttpClient) {
@@ -47,13 +49,15 @@ export class NewProjectComponent implements OnInit, OnDestroy {
   }
 
   startTraining() {
+    this.trainingStarted = true;
     this.http.get('http://localhost:5000/api/start_training').subscribe((data: any) => {
-      console.log(data.message);
+      //console.log(data.message);
     });
   }
 
   updateChartData(metric: any) {
     // Assuming your metric object has a property called "loss" and another called "epoch"
+    //console.log('Received metric:', metric); // Add this line for debugging
     (this.lineChartData[0].data as number[]).push(metric.loss);
     this.lineChartLabels.push(metric.epoch.toString());
   }
