@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { ChartDataSets, ChartOptions } from 'chart.js';
+import { ChartDataset, ChartOptions } from 'chart.js';
 import io from 'socket.io-client';
 
 @Component({
@@ -14,7 +14,7 @@ export class NewProjectComponent implements OnInit, OnDestroy {
 
   private socket: any;
 
-  public lineChartData: ChartDataSets[] = [{ data: [], label: 'Training Loss' }];
+  public lineChartData: ChartDataset[] = [{ data: [], label: 'Training Loss' }];
   public lineChartLabels: string[] = [];
   public lineChartOptions: ChartOptions = { responsive: true };
   public lineChartColors = [

@@ -5,6 +5,7 @@ import { AppComponent } from './app.component';
 import { StartPageComponent } from './start-page/start-page.component';
 import { NewProjectComponent } from './new-project/new-project.component';
 import { HttpClientModule } from '@angular/common/http';
+import { ChartsModule } from 'ng2-charts';
 
 
 const routes: Routes = [
@@ -21,6 +22,7 @@ const routes: Routes = [
   imports: [
     BrowserModule,
     HttpClientModule,
+    ChartsModule,
     RouterModule.forRoot(routes)
   ],
   providers: [],

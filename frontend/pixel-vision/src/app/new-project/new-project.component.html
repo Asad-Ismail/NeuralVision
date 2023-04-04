@@ -1,11 +1,15 @@
-<button (click)="startTraining()">Start Training</button>
-<div *ngIf="logs">
-  <h2>Training Logs</h2>
-  <pre>{{ logs }}</pre>
-</div>
-
-<div *ngIf="metrics">
-  <h2>Training Curve</h2>
-  <canvas baseChart [datasets]="lineChartData" [labels]="lineChartLabels" [options]="lineChartOptions" [colors]="lineChartColors" [legend]="lineChartLegend" [chartType]="lineChartType" [plugins]="lineChartPlugins">
-  </canvas>
-</div>
+<div>
+    <button (click)="startTraining()">Start Training</button>
+    <pre>{{ logs }}</pre>
+  </div>
+  <div>
+    <canvas baseChart
+            [data]="lineChartData"
+            [labels]="lineChartLabels"
+            [options]="lineChartOptions"
+            [colors]="lineChartColors"
+            [legend]="lineChartLegend"
+            [chartType]="lineChartType"
+            [plugins]="lineChartPlugins">
+    </canvas>
+  </div>
