@@ -1,19 +1,18 @@
 <div>
-    <button class="start-training-btn" (click)="startTraining()">Start Training</button>
-    <pre>{{ logs }}</pre>
+    <button (click)="startTraining()" class="start-training-btn">Start Training</button>
   </div>
   
-  <ng-container *ngIf="trainingStarted">
-    <div>
-      <canvas
-        baseChart
-        [datasets]="lineChartData"
-        [labels]="lineChartLabels"
-        [options]="lineChartOptions"
-        [legend]="lineChartLegend"
-        [type]="lineChartType"
-        [plugins]="lineChartPlugins"
-      >
-      </canvas>
-    </div>
-  </ng-container>
+  <div *ngIf="trainingStarted">
+    <canvas
+      *ngIf="changeTrigger"
+      baseChart
+      [datasets]="lineChartData"
+      [labels]="lineChartLabels"
+      [options]="lineChartOptions"
+      [legend]="lineChartLegend"
+      [type]="lineChartType"
+      [plugins]="lineChartPlugins"
+    >
+    </canvas>
+  </div>
+  

@@ -12,6 +12,7 @@ export class NewProjectComponent implements OnInit, OnDestroy {
   logs: string = '';
   metrics: any[] = [];
   trainingStarted: boolean = false;
+  public changeTrigger = 0;
 
   private socket: any;
 
@@ -35,7 +36,7 @@ export class NewProjectComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.socket.on('log', (log: string) => {
-      this.logs += log + '\n';
+      this.changeTrigger++;
     });
 
     this.socket.on('metric', (metric: any) => {
@@ -57,8 +58,8 @@ export class NewProjectComponent implements OnInit, OnDestroy {
 
   updateChartData(metric: any) {
     // Assuming your metric object has a property called "loss" and another called "epoch"
-    //console.log('Received metric:', metric); // Add this line for debugging
     (this.lineChartData[0].data as number[]).push(metric.loss);
     this.lineChartLabels.push(metric.epoch.toString());
+    //console.log(metric);
   }
 }
