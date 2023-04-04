@@ -1,17 +1,19 @@
-<div>
-    <button (click)="startTraining()" class="start-training-btn">Start Training</button>
+<div class="Intro">
+    <h1>Training AI Model</h1>
+    <button (click)="startTraining()" class="btn-excite">Start Training</button>
   </div>
   
-  <div *ngIf="trainingStarted">
+  <div *ngIf="trainingStarted" class="chart-container">
     <canvas
-      *ngIf="changeTrigger"
-      baseChart
-      [datasets]="lineChartData"
-      [labels]="lineChartLabels"
-      [options]="lineChartOptions"
-      [legend]="lineChartLegend"
-      [type]="lineChartType"
-      [plugins]="lineChartPlugins"
+        width="800" height="400" 
+        *ngIf="changeTrigger"
+        baseChart
+        [datasets]="lineChartData"
+        [labels]="lineChartLabels"
+        [options]="lineChartOptions"
+        [legend]="lineChartLegend"
+        [type]="lineChartType"
+        [plugins]="lineChartPlugins"
     >
     </canvas>
   </div>

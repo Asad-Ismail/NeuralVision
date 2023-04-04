@@ -25,7 +25,7 @@ export class NewProjectComponent implements OnInit, OnDestroy {
     },
   ];
   public lineChartLabels: string[] = [];
-  public lineChartOptions: ChartOptions = { responsive: true };
+  public lineChartOptions: ChartOptions = { responsive: true};
   public lineChartLegend = true;
   public lineChartType: 'line' = 'line';
   public lineChartPlugins = [];
