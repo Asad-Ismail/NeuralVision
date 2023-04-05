@@ -29,7 +29,7 @@ input {
 .btn-excite {
     background-color: #ff5722;
     color: #fff;
-    font-size: 28px;
+    font-size: 20px;
     padding: 20px 60px;
     border-radius: 50px;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
@@ -39,16 +39,10 @@ input {
     text-shadow: 0px 1px 1px rgba(0, 0, 0, 0.2);
     outline: none;
     margin-bottom: 2rem;
-  }
-  
-  .btn-secondary {
-    font-size: 16px;
-    padding: 10px 30px;
-    border-radius: 5px;
-    margin-bottom: 1rem;
+    width: 350px; /* Set a fixed width for the buttons */
+    text-align: center; /* Align the text in the center of the button */
   }
 
-  
   .btn-excite:hover {
     background-color: #fff;
     color: #ff5722;

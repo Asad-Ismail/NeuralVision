@@ -1,5 +1,6 @@
 
 <div class="container">
+
   <div class="intro">
     <h1>Training AI Model</h1>
     <h2>Step 1: Configure Hyperparameters</h2>
@@ -8,7 +9,7 @@
       <label for="learningRate">Learning Rate</label>
       <input formControlName="learningRate" id="learningRate" type="number" min="0.0001" step="0.0001" required>
       <!-- Add more form controls if needed -->
-      <button type="submit" class="btn-excite btn-secondary">Submit Hyperparameters</button>
+      <button type="submit" class="btn-excite">Submit HParameters</button>
     </form>
   </div>
 
@@ -16,24 +17,25 @@
     <h2>Step 2: Start Training</h2>
     <button (click)="startTraining()" class="btn-excite">Start Training</button>
   </div>
-</div>
 
-<div *ngIf="trainingStarted" class="chart-container">
-  <canvas
-      width="1200" height="800" 
-      baseChart
-      [datasets]="lineChartData"
-      [labels]="lineChartLabels"
-      [options]="lineChartOptions"
-      [legend]="lineChartLegend"
-      [type]="lineChartType"
-      [plugins]="lineChartPlugins"
-  >
-  </canvas>
-</div>
-
-<div class="status-bar-container">
-  <div class="status-bar">
-    {{ trainingStatus }}
+  <div *ngIf="trainingStarted" class="chart-container">
+    <canvas
+        width="1200" height="800" 
+        baseChart
+        [datasets]="lineChartData"
+        [labels]="lineChartLabels"
+        [options]="lineChartOptions"
+        [legend]="lineChartLegend"
+        [type]="lineChartType"
+        [plugins]="lineChartPlugins"
+    >
+    </canvas>
   </div>
+
+  <div class="status-bar-container">
+    <div class="status-bar">
+      {{ trainingStatus }}
+    </div>
+  </div>
+
 </div>
