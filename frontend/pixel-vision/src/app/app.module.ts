@@ -6,6 +6,8 @@ import { StartPageComponent } from './start-page/start-page.component';
 import { NewProjectComponent } from './new-project/new-project.component';
 import { HttpClientModule } from '@angular/common/http';
 import { NgChartsModule } from 'ng2-charts';
+import { ReactiveFormsModule } from '@angular/forms';
+
 
 const routes: Routes = [
   { path: '', component: StartPageComponent },
@@ -22,6 +24,7 @@ const routes: Routes = [
     BrowserModule,
     HttpClientModule,
     NgChartsModule,
+    ReactiveFormsModule,
     RouterModule.forRoot(routes)
   ],
   providers: [],

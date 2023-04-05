@@ -2,6 +2,14 @@ import json
 import time
 import os
 
+
+#import json
+
+#with open('hyperparameters.json', 'r') as f:
+#    hyperparameters = json.load(f)
+
+#learning_rate = hyperparameters['learningRate']
+
 def train():
     
     if os.path.exists("training_data.json"):
