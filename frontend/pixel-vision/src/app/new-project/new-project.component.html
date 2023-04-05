@@ -2,20 +2,28 @@
 <div class="container">
 
   <div class="intro">
-    <h1>Training AI Model</h1>
-    <h2>Step 1: Configure Hyperparameters</h2>
+    <h1>Train Self Supervised Model</h1>
+    <div class="step-container">
+      <h3>Step 1: Configure Hyperparameters</h3>
+    </div>
     <form [formGroup]="hyperparametersForm" (ngSubmit)="submitHyperparameters()">
       <!-- Add your desired hyperparameters as form controls here -->
       <label for="learningRate">Learning Rate</label>
       <input formControlName="learningRate" id="learningRate" type="number" min="0.0001" step="0.0001" required>
       <!-- Add more form controls if needed -->
-      <button type="submit" class="btn-excite">Submit HParameters</button>
+      <div class="button-container">
+        <button type="submit" class="btn-excite">Submit HParameters</button>
+      </div>
     </form>
   </div>
 
   <div class="training-section" *ngIf="hyperparametersSubmitted">
-    <h2>Step 2: Start Training</h2>
-    <button (click)="startTraining()" class="btn-excite">Start Training</button>
+    <div class="step-container">
+      <h3>Step 2: Start Training</h3>
+    </div>
+    <div class="button-container">
+      <button (click)="startTraining()" class="btn-excite">Start Training</button>
+    </div>
   </div>
 
   <div *ngIf="trainingStarted" class="chart-container">
