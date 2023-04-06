@@ -57,6 +57,9 @@ export class NewProjectComponent implements OnInit, OnDestroy
     this.hyperparametersForm = new FormGroup({
       learningRate: new FormControl(0.001, Validators.required),
       // Add more form controls if needed
+      epochs: new FormControl(50, Validators.required),
+      batchSize: new FormControl(32, Validators.required),
+      algorithmType: new FormControl('MOCO', Validators.required)
     });
   }
 
