@@ -3,44 +3,47 @@
 
   <div class="intro">
     <h1>Train Self Supervised Model</h1>
-    <div class="step-container">
-      <h3>Step 1: Configure Hyperparameters</h3>
-    </div>
-    <form [formGroup]="hyperparametersForm" (ngSubmit)="submitHyperparameters()">
-      <div class="form-row">
-        <label for="learningRate">Learning Rate</label>
-        <input formControlName="learningRate" id="learningRate" type="number" min="0.0001" step="0.0001" required>
-
-        <label for="epochs">Epochs</label>
-        <input formControlName="epochs" id="epochs" type="number" min="1" step="1" required>
-
-        <label for="batchSize">Batch Size</label>
-        <input formControlName="batchSize" id="batchSize" type="number" min="1" step="1" required>
-
-        <label for="algorithmType">Algorithm Type</label>
-        <select formControlName="algorithmType" id="algorithmType" required>
-          <option value="">Select Algorithm</option>
-          <option value="algorithm1">Algorithm 1</option>
-          <option value="algorithm2">Algorithm 2</option>
-          <option value="algorithm3">Algorithm 3</option>
-        </select>
+    <div class="steps-wrapper">
+      <div class="step-container">
+        <h3>Step 1: Configure Hyperparameters</h3>
       </div>
-      <!-- Add more form controls if needed -->
+      <form [formGroup]="hyperparametersForm" (ngSubmit)="submitHyperparameters()">
+        <div class="form-row">
+          <label for="learningRate">Learning Rate</label>
+          <input formControlName="learningRate" id="learningRate" type="number" min="0.0001" step="0.0001" required>
+
+          <label for="epochs">Epochs</label>
+          <input formControlName="epochs" id="epochs" type="number" min="1" step="1" required>
+
+          <label for="batchSize">Batch Size</label>
+          <input formControlName="batchSize" id="batchSize" type="number" min="1" step="1" required>
+
+          <label for="algorithmType">Algorithm Type</label>
+          <select formControlName="algorithmType" id="algorithmType" required>
+            <option value="">Select Algorithm</option>
+            <option value="algorithm1">Algorithm 1</option>
+            <option value="algorithm2">Algorithm 2</option>
+            <option value="algorithm3">Algorithm 3</option>
+          </select>
+        </div>
+        <!-- Add more form controls if needed -->
+        <div class="button-container">
+          <button type="submit" class="btn-excite">Submit HParameters</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="training-section" *ngIf="hyperparametersSubmitted">
+      <div class="step-container">
+        <h3>Step 2: Start Training</h3>
+      </div>
       <div class="button-container">
-        <button type="submit" class="btn-excite">Submit HParameters</button>
+        <button (click)="startTraining()" class="btn-excite">Start Training</button>
       </div>
-    </form>
-  </div>
-
-  <div class="training-section" *ngIf="hyperparametersSubmitted">
-    <div class="step-container">
-      <h3>Step 2: Start Training</h3>
-    </div>
-    <div class="button-container">
-      <button (click)="startTraining()" class="btn-excite">Start Training</button>
     </div>
   </div>
 
+  
   <div *ngIf="trainingStarted" class="chart-container">
     <canvas
         width="1200" height="800" 
