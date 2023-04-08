@@ -101,7 +101,7 @@ def stop_training():
     global status, training_thread, observer
     if training_thread and training_thread.is_alive():
         logging.debug(f"Killing Training Process!! ")
-        training_thread.terminate()
+        stop_training_thread()  # Called stop_training_thread() here
         training_thread = None
 
     if observer:
