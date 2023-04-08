@@ -9,6 +9,8 @@ import time
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 import logging
+import signal
+import os
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -16,8 +18,10 @@ app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 socketio = SocketIO(app, cors_allowed_origins="*")
 
+
 status = None
-training_thread = None
+process = None
+training_thread =None
 observer = None
 
 class TrainingDataHandler(FileSystemEventHandler):
@@ -57,6 +61,7 @@ def read_metrics_from_file(socketio):
     observer.join()
 
 def start_training_thread():
+    global process
     process = subprocess.Popen(['python', 'train.py'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=1, universal_newlines=True)
     process.communicate()
     
@@ -83,10 +88,19 @@ def start_training():
     status = "Training"
     return jsonify({'message': 'Training started'}), 200
 
+
+def stop_training_thread():
+    global process
+    if process:
+        os.kill(process.pid, signal.SIGTERM)
+        process = None
+
 @app.route('/api/stop_training', methods=['GET'])
 def stop_training():
+    logging.debug(f"Trying to end the training ")
     global status, training_thread, observer
     if training_thread and training_thread.is_alive():
+        logging.debug(f"Killing Training Process!! ")
         training_thread.terminate()
         training_thread = None
 
