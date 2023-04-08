@@ -21,10 +21,13 @@
           <label for="algorithmType">Algorithm Type</label>
           <select formControlName="algorithmType" id="algorithmType" required>
             <option value="">Select Algorithm</option>
-            <option value="MOCO">Algorithm 1</option>
+            <option value="MOCO">MOCO</option>
             <option value="algorithm2">Algorithm 2</option>
             <option value="algorithm3">Algorithm 3</option>
           </select>
+        </div>
+        <div class="button-container">
+          <button type="button" class="btn-excite" (click)="reset()" style="margin-top: 1rem">Reset</button>
         </div>
         <!-- Add more form controls if needed -->
         <div class="button-container">

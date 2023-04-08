@@ -31,6 +31,22 @@ export class NewProjectComponent implements OnInit, OnDestroy
     this.lineChartLabels = [];
     this.trainingStatus = '';
     this.hyperparametersSubmitted = false; // Add this property to your class and set it to true after submitting the form
+    // Reset the hyperparameters form with default values
+    this.hyperparametersForm.reset({
+      learningRate: 0.001,
+      epochs: 10,
+      batchSize: 32,
+      algorithmType: 'MOCO'
+    });
+    // stop the training
+    this.http.get('http://localhost:5000/api/stop_training').subscribe(
+      (response) => {
+        console.log(response);
+      },
+      (error) => {
+        console.log(error);
+      }
+    );  
   }  
 
   public lineChartData: ChartDataset[] = [
@@ -124,4 +140,8 @@ export class NewProjectComponent implements OnInit, OnDestroy
       this.lineChartLabels = [...this.lineChartLabels];
     });
   }
+
+  
+
+
 }
