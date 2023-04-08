@@ -122,3 +122,23 @@ input {
     width: 100%;
     max-width: 200px; /* Set the maximum width for the select element */
   }
+
+
+  .btn-reset {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+    background-color: #f44336;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .btn-reset:hover {
+    background-color: #d32f2f;
+  }
+  
