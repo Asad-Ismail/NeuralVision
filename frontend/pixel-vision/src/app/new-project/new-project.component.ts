@@ -115,11 +115,8 @@ export class NewProjectComponent implements OnInit, OnDestroy
 
   ngOnDestroy(): void {
     this.socket.disconnect();
+    //reset everything
     this.reset();
-    // Send a request to the Flask app to stop the training and reset the variables
-  this.http.get('http://localhost:5000/api/reset').subscribe((data: any) => {
-    // Handle the response if needed
-  });
   }
 
   startTraining() {
