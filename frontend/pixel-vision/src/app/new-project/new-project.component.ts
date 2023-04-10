@@ -57,7 +57,7 @@ export class NewProjectComponent implements OnInit, OnDestroy
         }
   
         try {
-          const response = await this.http.post('YOUR_FLASK_BACKEND_API_ENDPOINT', formData).toPromise();
+          const response = await this.http.post('/api/upload', formData).toPromise();
           console.log(response);
         } catch (error) {
           console.error('Upload failed for chunk', error);
