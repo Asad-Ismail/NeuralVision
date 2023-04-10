@@ -1,66 +1,96 @@
-
 <div class="container">
   <div class="intro">
+    <!-- Header -->
     <div class="header-container">
       <h1>Train Self Supervised Model</h1>
-      <button type="button" class="btn-reset" (click)="reset()">Reset</button>
     </div>
-    <div class="steps-wrapper">
 
+    <div class="steps-wrapper">
+      <!-- Step 1: Select Training Dataset -->
       <div class="step-container">
         <h3>Step 1: Select Training Dataset</h3>
         <input type="file" id="imageInput" (change)="onFileSelect($event)" multiple accept="image/*">
+
+        <!-- Image Preview -->
         <div class="image-preview-container">
           <img *ngFor="let imageSrc of imagePreviews" [src]="imageSrc" class="image-thumbnail">
         </div>
+
+        <!-- Image Count -->
         <div *ngIf="imagePreviews.length > 0" class="image-count">
           Total images: {{ imagePreviews.length }}
         </div>
       </div>
+
+      <!-- Upload Button -->
       <div class="button-container">
         <button (click)="uploadImagesInChunks()" class="btn-excite">Upload Images</button>
-      </div>      
+      </div>
+
+      <!-- Reset Button -->
+      <div class="reset-button-container">
+        <button type="button" class="btn-reset" (click)="reset()">Reset</button>
+      </div>
+
+      <!-- Step 2: Configure Hyperparameters -->
       <div class="step-container">
         <h3>Step 2: Configure Hyperparameters</h3>
       </div>
 
+      <!-- Hyperparameters Form -->
       <form [formGroup]="hyperparametersForm" (ngSubmit)="submitHyperparameters()">
         <div class="form-row">
-          <label for="learningRate">Learning Rate</label>
-          <input formControlName="learningRate" id="learningRate" type="number" min="0.0001" step="0.0001" required>
-
-          <label for="epochs">Epochs</label>
-          <input formControlName="epochs" id="epochs" type="number" min="1" step="1" required>
-
-          <label for="batchSize">Batch Size</label>
-          <input formControlName="batchSize" id="batchSize" type="number" min="1" step="1" required>
-
-          <label for="algorithmType">Algorithm Type</label>
-          <select formControlName="algorithmType" id="algorithmType" required>
-            <option value="">Select Algorithm</option>
-            <option value="MOCO">MOCO</option>
-            <option value="algorithm2">Algorithm 2</option>
-            <option value="algorithm3">Algorithm 3</option>
-          </select>
+          <div class="form-row">
+            <label for="learningRate">Learning Rate</label>
+            <input formControlName="learningRate" id="learningRate" type="number" min="0.0001" step="0.0001" required>
+  
+            <label for="epochs">Epochs</label>
+            <input formControlName="epochs" id="epochs" type="number" min="1" step="1" required>
+  
+            <label for="batchSize">Batch Size</label>
+            <input formControlName="batchSize" id="batchSize" type="number" min="1" step="1" required>
+  
+            <label for="algorithmType">Algorithm Type</label>
+            <select formControlName="algorithmType" id="algorithmType" required>
+              <option value="">Select Algorithm</option>
+              <option value="MOCO">MOCO</option>
+              <option value="algorithm2">Algorithm 2</option>
+              <option value="algorithm3">Algorithm 3</option>
+            </select>
+          </div>
+          <!-- Add more form controls if needed -->
         </div>
-        <!-- Add more form controls if needed -->
+        <!-- Submit Button -->
         <div class="button-container">
           <button type="submit" class="btn-excite">Submit HParameters</button>
         </div>
       </form>
+
+      <!-- Reset Button -->
+      <div class="reset-button-container">
+        <button type="button" class="btn-reset" (click)="reset()">Reset</button>
+      </div>
     </div>
 
+    <!-- Step 3: Start Training -->
     <div class="training-section" *ngIf="hyperparametersSubmitted">
       <div class="step-container">
-        <h3>Step 2: Start Training</h3>
+        <h3>Step 3: Start Training</h3>
       </div>
+
+      <!-- Start Training Button -->
       <div class="button-container">
         <button (click)="startTraining()" class="btn-excite">Start Training</button>
+      </div>
+
+      <!-- Reset Button -->
+      <div class="reset-button-container">
+        <button type="button" class="btn-reset" (click)="reset()">Reset</button>
       </div>
     </div>
   </div>
 
-  
+  <!-- Chart Container -->
   <div *ngIf="trainingStarted" class="chart-container">
     <canvas
         width="1200" height="800" 
@@ -75,6 +105,7 @@
     </canvas>
   </div>
 
+  <!-- Status Bar -->
   <div class="status-bar-container">
     <div class="status-bar">
       {{ trainingStatus }}
