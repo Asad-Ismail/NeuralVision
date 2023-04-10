@@ -14,7 +14,7 @@ export class StartPageComponent {
   }
   newProject() 
   {
-    this.router.navigate(['/new-project']);
+    this.router.navigate(['/new-project-start']);
   }
   title = 'PixelVisionX';
 

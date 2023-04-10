@@ -27,6 +27,12 @@
         <button (click)="uploadImagesInChunks()" class="btn-excite">Upload Images</button>
       </div>
 
+      <!-- Upload Progress Bar -->
+      <div *ngIf="uploadInProgress" class="upload-progress-bar-container">
+        <div class="upload-progress-bar" [style.width.%]="uploadProgress"></div>
+        <div class="upload-progress-text">{{ uploadProgress }}%</div>
+      </div>
+
       <!-- Reset Button -->
       <div class="reset-button-container">
         <button type="button" class="btn-reset" (click)="reset()">Reset</button>

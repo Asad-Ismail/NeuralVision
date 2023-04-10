@@ -43,6 +43,8 @@ export class NewProjectComponent implements OnInit, OnDestroy
 
   // Input Images upload
   async uploadImagesInChunks() {
+    this.uploadInProgress = true;
+    this.uploadProgress = 0;
     const chunkSize = 10; // Number of images to upload in each chunk
     const imageInput = document.getElementById('imageInput') as HTMLInputElement;
   
@@ -64,6 +66,8 @@ export class NewProjectComponent implements OnInit, OnDestroy
         }
       }
       this.imagesUploaded = true;
+      // When the upload is completed
+      this.uploadInProgress = false;
     }
     
   }
@@ -109,6 +113,9 @@ export class NewProjectComponent implements OnInit, OnDestroy
   public lineChartType: 'line' = 'line';
   public lineChartPlugins = [];
   public trainingStatus: string = '';
+  uploadInProgress = false;
+  uploadProgress = 0;
+
   
 
   constructor(private http: HttpClient, private ngZone: NgZone) 
