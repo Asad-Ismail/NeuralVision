@@ -6,9 +6,21 @@
       <button type="button" class="btn-reset" (click)="reset()">Reset</button>
     </div>
     <div class="steps-wrapper">
+      
       <div class="step-container">
-        <h3>Step 1: Configure Hyperparameters</h3>
+        <h3>Step 1: Select Training Dataset</h3>
+        <input type="file" id="imageInput" (change)="onFileSelect($event)" multiple accept="image/*">
+        <div class="image-preview-container">
+          <img *ngFor="let imageSrc of imagePreviews" [src]="imageSrc" class="image-thumbnail">
+        </div>
+        <div *ngIf="imagePreviews.length > 0" class="image-count">
+          Total images: {{ imagePreviews.length }}
+        </div>
       </div>
+      <div class="step-container">
+        <h3>Step 2: Configure Hyperparameters</h3>
+      </div>
+
       <form [formGroup]="hyperparametersForm" (ngSubmit)="submitHyperparameters()">
         <div class="form-row">
           <label for="learningRate">Learning Rate</label>

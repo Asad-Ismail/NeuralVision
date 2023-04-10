@@ -22,6 +22,24 @@ export class NewProjectComponent implements OnInit, OnDestroy
   hyperparametersSubmitted: boolean = false;
   private socket: any;
 
+  imagePreviews: string[] = [];
+
+  onFileSelect(event: any) {
+    this.imagePreviews = [];
+    const files = event.target.files;
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const reader = new FileReader();
+
+      reader.onload = (e: any) => {
+        this.imagePreviews.push(e.target.result);
+      };
+
+      reader.readAsDataURL(file);
+    }
+  }
+
 
   reset() {
     this.logs = '';
@@ -66,8 +84,9 @@ export class NewProjectComponent implements OnInit, OnDestroy
   public trainingStatus: string = '';
   
 
-  constructor(private http: HttpClient, private ngZone: NgZone) {
-
+  constructor(private http: HttpClient, private ngZone: NgZone) 
+  
+  {
     this.socket = io('http://localhost:5000');
     // Initialize the hyperparameters form with default values
     this.hyperparametersForm = new FormGroup({
