@@ -70,6 +70,7 @@ def start_training_thread():
 
 @app.route('/api/upload', methods=['POST'])
 def upload_images():
+    logging.debug(f"Received Image"*20)
     if 'images' not in request.files:
         return {'error': 'No images found'}, 400
 
