@@ -6,7 +6,7 @@
       <button type="button" class="btn-reset" (click)="reset()">Reset</button>
     </div>
     <div class="steps-wrapper">
-      
+
       <div class="step-container">
         <h3>Step 1: Select Training Dataset</h3>
         <input type="file" id="imageInput" (change)="onFileSelect($event)" multiple accept="image/*">
@@ -17,6 +17,9 @@
           Total images: {{ imagePreviews.length }}
         </div>
       </div>
+      <div class="button-container">
+        <button (click)="uploadImagesInChunks()" class="btn-excite">Upload Images</button>
+      </div>      
       <div class="step-container">
         <h3>Step 2: Configure Hyperparameters</h3>
       </div>

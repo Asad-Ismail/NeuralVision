@@ -40,6 +40,34 @@ export class NewProjectComponent implements OnInit, OnDestroy
     }
   }
 
+  // Input Images upload
+  async uploadImagesInChunks() {
+    const chunkSize = 10; // Number of images to upload in each chunk
+    const imageInput = document.getElementById('imageInput') as HTMLInputElement;
+  
+    if (imageInput.files) {
+      const files = Array.from(imageInput.files);
+  
+      for (let i = 0; i < files.length; i += chunkSize) {
+        const formData = new FormData();
+        const chunk = files.slice(i, i + chunkSize);
+  
+        for (const file of chunk) {
+          formData.append('images', file);
+        }
+  
+        try {
+          const response = await this.http.post('YOUR_FLASK_BACKEND_API_ENDPOINT', formData).toPromise();
+          console.log(response);
+        } catch (error) {
+          console.error('Upload failed for chunk', error);
+          // Handle the upload failure (retry or inform the user)
+        }
+      }
+    }
+  }
+  
+
 
   reset() {
     this.logs = '';

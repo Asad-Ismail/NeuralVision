@@ -17,7 +17,9 @@ logging.basicConfig(level=logging.DEBUG)
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 socketio = SocketIO(app, cors_allowed_origins="*")
-
+app.config['UPLOAD_FOLDER'] = 'static/uploads'  
+# Create the directory and its parent directories if they don't exist
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 status = None
 process = None
@@ -64,7 +66,22 @@ def start_training_thread():
     global process
     process = subprocess.Popen(['python', 'train.py'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=1, universal_newlines=True)
     process.communicate()
-    
+  
+
+@app.route('/api/upload', methods=['POST'])
+def upload_images():
+    if 'images' not in request.files:
+        return {'error': 'No images found'}, 400
+
+    images = request.files.getlist('images')
+
+    for image in images:
+        filename = image.filename
+        save_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        image.save(save_path)
+
+    return {'message': 'Images uploaded successfully'}, 200
+
 
 @app.route('/api/set_hyperparameters', methods=['POST'])
 def set_hyperparameters():
