@@ -23,6 +23,7 @@ export class NewProjectComponent implements OnInit, OnDestroy
   private socket: any;
 
   imagePreviews: string[] = [];
+  imagesUploaded = false;
 
   onFileSelect(event: any) {
     this.imagePreviews = [];
@@ -62,7 +63,9 @@ export class NewProjectComponent implements OnInit, OnDestroy
           // Handle the upload failure (retry or inform the user)
         }
       }
+      this.imagesUploaded = true;
     }
+    
   }
   
   reset() {
