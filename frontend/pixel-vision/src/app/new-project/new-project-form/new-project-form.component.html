@@ -1,6 +1,10 @@
-<form [formGroup]="projectForm" (ngSubmit)="onSubmit()" class="project-form">
-    <label for="name" class="form-label">Project Name</label>
-    <input formControlName="name" id="name" type="text" class="form-input">
-    <button type="submit" [disabled]="!projectForm.valid" class="submit-button">Create Project</button>
-  </form>
+<div class="form-wrapper"> <!-- Add this div -->
+    <form [formGroup]="projectForm" (ngSubmit)="onSubmit()" class="project-form">
+      <div class="form-group">
+        <label for="name" class="form-label">Project Name</label>
+        <input formControlName="name" id="name" type="text" class="form-input">
+        <button type="submit" class="submit-button">Create Project</button>
+      </div>
+    </form>
+  </div> <!-- Close the div -->
   
