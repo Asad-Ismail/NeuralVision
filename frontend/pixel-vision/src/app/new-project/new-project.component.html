@@ -4,93 +4,98 @@
     <div class="header-container">
       <h1>Train Self Supervised Model</h1>
     </div>
-
-    <div class="steps-wrapper">
-      <!-- Step 1: Select Training Dataset -->
-      <div class="step-container">
-        <h3>Step 1: Select Training Dataset</h3>
-        <input type="file" id="imageInput" (change)="onFileSelect($event)" multiple accept="image/*">
-
-        <!-- Image Preview -->
-        <div class="image-preview-container">
-          <img *ngFor="let imageSrc of imagePreviews" [src]="imageSrc" class="image-thumbnail">
-        </div>
-
-        <!-- Image Count -->
-        <div *ngIf="imagePreviews.length > 0" class="image-count">
-          Total images: {{ imagePreviews.length }}
-        </div>
-      </div>
-
-      <!-- Upload Button -->
-      <div class="button-container">
-        <button (click)="uploadImagesInChunks()" class="btn-excite">Upload Images</button>
-      </div>
-
-      <!-- Upload Progress Bar -->
-      <div *ngIf="uploadInProgress" class="upload-progress-bar-container">
-        <div class="upload-progress-bar" [style.width.%]="uploadProgress"></div>
-        <div class="upload-progress-text">{{ uploadProgress }}%</div>
-      </div>
-
-      <!-- Reset Button -->
-      <div class="reset-button-container">
-        <button type="button" class="btn-reset" (click)="reset()">Reset</button>
-      </div>
-
-      <!-- Step 2: Configure Hyperparameters -->
-      <ng-container *ngIf="imagesUploaded">
+    <div class="header-buttons">
+      <button type="button" class="btn-excite btn-continue" (click)="continueProcess()">Continue</button>
+      <button type="button" class="btn-excite btn-skip" (click)="skipProcess()">Skip(Self SuperVision)</button>
+    </div>
+    <div class="steps-container" *ngIf="showSteps">
+      <div class="steps-wrapper">
+        <!-- Step 1: Select Training Dataset -->
         <div class="step-container">
-          <h3>Step 2: Configure Hyperparameters</h3>
-        </div>
+          <h3>Step 1: Select Training Dataset</h3>
+          <input type="file" id="imageInput" (change)="onFileSelect($event)" multiple accept="image/*">
 
-        <!-- Hyperparameters Form -->
-        <form [formGroup]="hyperparametersForm" (ngSubmit)="submitHyperparameters()">
-          <div class="form-row">
-            <label for="learningRate">Learning Rate</label>
-            <input formControlName="learningRate" id="learningRate" type="number" min="0.0001" step="0.0001" required>
-
-            <label for="epochs">Epochs</label>
-            <input formControlName="epochs" id="epochs" type="number" min="1" step="1" required>
-
-            <label for="batchSize">Batch Size</label>
-            <input formControlName="batchSize" id="batchSize" type="number" min="1" step="1" required>
-
-            <label for="algorithmType">Algorithm Type</label>
-            <select formControlName="algorithmType" id="algorithmType" required>
-              <option value="">Select Algorithm</option>
-              <option value="MOCO">MOCO</option>
-              <option value="algorithm2">Algorithm 2</option>
-              <option value="algorithm3">Algorithm 3</option>
-            </select>
-            <!-- Add more form controls if needed -->
+          <!-- Image Preview -->
+          <div class="image-preview-container">
+            <img *ngFor="let imageSrc of imagePreviews" [src]="imageSrc" class="image-thumbnail">
           </div>
-          <!-- Submit Button -->
-          <div class="button-container">
-            <button type="submit" class="btn-excite">Submit HParameters</button>
+
+          <!-- Image Count -->
+          <div *ngIf="imagePreviews.length > 0" class="image-count">
+            Total images: {{ imagePreviews.length }}
           </div>
-        </form>
-
-        <!-- Reset Button -->
-        <div class="reset-button-container">
-          <button type="button" class="btn-reset" (click)="reset()">Reset</button>
-        </div>
-      </ng-container>
-
-      <!-- Step 3: Start Training -->
-      <div class="training-section" *ngIf="hyperparametersSubmitted">
-        <div class="step-container">
-          <h3>Step 3: Start Training</h3>
         </div>
 
-        <!-- Start Training Button -->
+        <!-- Upload Button -->
         <div class="button-container">
-          <button (click)="startTraining()" class="btn-excite">Start Training</button>
+          <button (click)="uploadImagesInChunks()" class="btn-excite">Upload Images</button>
+        </div>
+
+        <!-- Upload Progress Bar -->
+        <div *ngIf="uploadInProgress" class="upload-progress-bar-container">
+          <div class="upload-progress-bar" [style.width.%]="uploadProgress"></div>
+          <div class="upload-progress-text">{{ uploadProgress }}%</div>
         </div>
 
         <!-- Reset Button -->
         <div class="reset-button-container">
           <button type="button" class="btn-reset" (click)="reset()">Reset</button>
+        </div>
+
+        <!-- Step 2: Configure Hyperparameters -->
+        <ng-container *ngIf="imagesUploaded">
+          <div class="step-container">
+            <h3>Step 2: Configure Hyperparameters</h3>
+          </div>
+
+          <!-- Hyperparameters Form -->
+          <form [formGroup]="hyperparametersForm" (ngSubmit)="submitHyperparameters()">
+            <div class="form-row">
+              <label for="learningRate">Learning Rate</label>
+              <input formControlName="learningRate" id="learningRate" type="number" min="0.0001" step="0.0001" required>
+
+              <label for="epochs">Epochs</label>
+              <input formControlName="epochs" id="epochs" type="number" min="1" step="1" required>
+
+              <label for="batchSize">Batch Size</label>
+              <input formControlName="batchSize" id="batchSize" type="number" min="1" step="1" required>
+
+              <label for="algorithmType">Algorithm Type</label>
+              <select formControlName="algorithmType" id="algorithmType" required>
+                <option value="">Select Algorithm</option>
+                <option value="MOCO">MOCO</option>
+                <option value="algorithm2">Algorithm 2</option>
+                <option value="algorithm3">Algorithm 3</option>
+              </select>
+              <!-- Add more form controls if needed -->
+            </div>
+            <!-- Submit Button -->
+            <div class="button-container">
+              <button type="submit" class="btn-excite">Submit HParameters</button>
+            </div>
+          </form>
+
+          <!-- Reset Button -->
+          <div class="reset-button-container">
+            <button type="button" class="btn-reset" (click)="reset()">Reset</button>
+          </div>
+        </ng-container>
+
+        <!-- Step 3: Start Training -->
+        <div class="training-section" *ngIf="hyperparametersSubmitted">
+          <div class="step-container">
+            <h3>Step 3: Start Training</h3>
+          </div>
+
+          <!-- Start Training Button -->
+          <div class="button-container">
+            <button (click)="startTraining()" class="btn-excite">Start Training</button>
+          </div>
+
+          <!-- Reset Button -->
+          <div class="reset-button-container">
+            <button type="button" class="btn-reset" (click)="reset()">Reset</button>
+          </div>
         </div>
       </div>
     </div>
@@ -112,7 +117,7 @@
   </div>
 
   <!-- Status Bar -->
-  <div class="status-bar-container">
+  <div class="status-bar-container" *ngIf="showSteps">
     <div class="status-bar">
       {{ trainingStatus }}
     </div>

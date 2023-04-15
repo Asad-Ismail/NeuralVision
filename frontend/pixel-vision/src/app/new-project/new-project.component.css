@@ -212,3 +212,39 @@ h1, h3 {
   font-weight: bold;
 }
 
+
+.tooltip-text {
+  visibility: hidden;
+  width: 200px;
+  background-color: #555;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 8px 0;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%; /* Position the tooltip above the button */
+  left: 50%;
+  margin-left: -100px; /* Center the tooltip */
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.btn-skip:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+
+.header-buttons {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 1rem;
+}
+
+.btn-continue,
+.btn-skip {
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
+}
+
+

@@ -115,6 +115,7 @@ export class NewProjectComponent implements OnInit, OnDestroy
   public trainingStatus: string = '';
   uploadInProgress = false;
   uploadProgress = 0;
+  showSteps = false;
 
   
 
@@ -178,6 +179,16 @@ export class NewProjectComponent implements OnInit, OnDestroy
       //console.log(data.message);
     });
   }
+
+  skipProcess() {
+    //  logic for skipping the self-supervised model training process
+  }
+
+  continueProcess() {
+    //  logic for skipping the self-supervised model training process
+    this.showSteps = true;
+  }
+  
 
   updateChartData(metric: any) {
     // Assuming your metric object has a property called "loss" and another called "epoch"
