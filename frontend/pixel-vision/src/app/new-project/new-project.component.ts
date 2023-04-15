@@ -3,6 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { ChartDataset, ChartOptions } from 'chart.js';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import io from 'socket.io-client';
+import { Router } from '@angular/router';
+
 
 @Component({
   selector: 'app-new-project',
@@ -119,7 +121,7 @@ export class NewProjectComponent implements OnInit, OnDestroy
 
   
 
-  constructor(private http: HttpClient, private ngZone: NgZone) 
+  constructor(private http: HttpClient, private ngZone: NgZone,private router: Router) 
   
   {
     this.socket = io('http://localhost:5000');
@@ -182,6 +184,7 @@ export class NewProjectComponent implements OnInit, OnDestroy
 
   skipProcess() {
     //  logic for skipping the self-supervised model training process
+    this.router.navigate(['task-selection/']);
   }
 
   continueProcess() {

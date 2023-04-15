@@ -1,0 +1,15 @@
+<div class="container">
+    <div class="intro">
+      <div class="header-container">
+        <h1>Select Computer Vision Task</h1>
+      </div>
+      <div class="task-selection-container">
+        <div class="task-card" *ngFor="let task of tasks" (click)="onTaskSelect(task)">
+            <h3>{{ task.name }}</h3>
+
+        </div>
+      </div>
+    </div>
+</div>
+  
+  

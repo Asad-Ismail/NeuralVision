@@ -1,0 +1,36 @@
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+  
+  .intro {
+    text-align: center;
+  }
+  
+  .header-container {
+    margin-bottom: 2rem;
+  }
+  
+  .task-selection-container {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+  }
+  
+  .task-card {
+    background-color: #f57c00; /* Orange background color */
+    color: #ffffff; /* White text color */
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 1rem;
+    margin: 1rem;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+  
+  .task-card:hover {
+    transform: scale(1.05);
+  }
+  

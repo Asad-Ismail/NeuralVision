@@ -8,12 +8,15 @@ import { HttpClientModule } from '@angular/common/http';
 import { NgChartsModule } from 'ng2-charts';
 import { ReactiveFormsModule } from '@angular/forms';
 import { NewProjectFormComponent } from './new-project/new-project-form/new-project-form.component';
+import { TaskSelectionComponent } from './task-selection/task-selection.component';
+import { InstanceSegmentationComponent } from './instance-segmentation/instance-segmentation.component';
 
 
 const routes: Routes = [
   { path: '', component: StartPageComponent },
   { path: 'new-project-start', component: NewProjectFormComponent},
   { path: 'new-project', component: NewProjectComponent},
+  { path: 'task-selection', component: TaskSelectionComponent }
 ];
 
 @NgModule({
@@ -21,7 +24,9 @@ const routes: Routes = [
     AppComponent,
     NewProjectComponent,
     StartPageComponent,
-    NewProjectFormComponent
+    NewProjectFormComponent,
+    TaskSelectionComponent,
+    InstanceSegmentationComponent
   ],
   imports: [
     BrowserModule,
