@@ -1,6 +1,6 @@
-<form [formGroup]="projectForm" (ngSubmit)="onSubmit()">
-    <label for="name">New Project Name:</label>
-    <input formControlName="name" id="name" type="text" required>
-    <button type="submit" [disabled]="projectForm.invalid">Create New Project</button>
-</form>
+<form [formGroup]="projectForm" (ngSubmit)="onSubmit()" class="project-form">
+    <label for="name" class="form-label">Project Name</label>
+    <input formControlName="name" id="name" type="text" class="form-input">
+    <button type="submit" [disabled]="!projectForm.valid" class="submit-button">Create Project</button>
+  </form>
   

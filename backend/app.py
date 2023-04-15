@@ -66,11 +66,18 @@ def start_training_thread():
     global process
     process = subprocess.Popen(['python', 'train.py'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=1, universal_newlines=True)
     process.communicate()
-  
+
+
+@app.route('/api/newproject', methods=['POST'])
+def new_project():
+    project_name = request.json['name']
+    logging.debug(f"Received Project Name"*20)
+    logging.debug(project_name)
+    return jsonify({'status': 'success'})
+
 
 @app.route('/api/upload', methods=['POST'])
 def upload_images():
-    logging.debug(f"Received Image"*20)
     if 'images' not in request.files:
         return {'error': 'No images found'}, 400
 

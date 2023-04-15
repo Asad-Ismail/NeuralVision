@@ -39,3 +39,12 @@
 {"epoch": 39, "loss": -2.9}
 {"epoch": 40, "loss": -3.0}
 {"epoch": 41, "loss": -3.0999999999999996}
+{"epoch": 42, "loss": -3.2}
+{"epoch": 43, "loss": -3.3}
+{"epoch": 44, "loss": -3.4000000000000004}
+{"epoch": 45, "loss": -3.5}
+{"epoch": 46, "loss": -3.5999999999999996}
+{"epoch": 47, "loss": -3.7}
+{"epoch": 48, "loss": -3.8}
+{"epoch": 49, "loss": -3.9000000000000004}
+{"Training completed": true}
