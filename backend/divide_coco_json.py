@@ -5,7 +5,7 @@ def divide_coco_json(input_json_file, output_directory):
     # Read the input JSON file
     with open(input_json_file, 'r') as infile:
         coco_data = json.load(infile)
-
+        
     # Check if the output directory exists, if not, create it
     if not os.path.exists(output_directory):
         os.makedirs(output_directory)
@@ -33,8 +33,8 @@ def divide_coco_json(input_json_file, output_directory):
 
     print(f"JSON files created in the '{output_directory}' directory.")
 
+if __name__ == '__main__':
+    input_json_file = '/home/asad/Downloads/Balloons.v15i.coco-segmentation/train/_annotations.coco.json'
+    output_directory = '/home/asad/Downloads/Balloons.v15i.coco-segmentation/train/annoations'
+    divide_coco_json(input_json_file, output_directory)   
 
-# Example usage
-input_json_file = '~/Downloads/Balloons.v15i.coco-segmentation/train/_annotations.coco.json'
-output_directory = '~/Downloads/Balloons.v15i.coco-segmentation/train/annoations'
-divide_coco_json(input_json_file, output_directory)
