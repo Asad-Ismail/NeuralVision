@@ -35,6 +35,6 @@ def divide_coco_json(input_json_file, output_directory):
 
 
 # Example usage
-input_json_file = 'path/to/your/coco_data.json'
-output_directory = 'path/to/output/directory'
+input_json_file = '~/Downloads/Balloons.v15i.coco-segmentation/train/_annotations.coco.json'
+output_directory = '~/Downloads/Balloons.v15i.coco-segmentation/train/annoations'
 divide_coco_json(input_json_file, output_directory)
