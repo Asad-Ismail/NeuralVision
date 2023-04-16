@@ -60,7 +60,7 @@ export class NewProjectComponent implements OnInit, OnDestroy
         for (const file of chunk) {formData.append('images', file);}
   
         try {
-          const response = await this.http.post('http://localhost:5000/api/upload', formData).toPromise();
+          const response = await this.http.post('http://localhost:5000/api/uploadimages', formData).toPromise();
           console.log(response);
         } catch (error) {
           console.error('Upload failed for chunk', error);

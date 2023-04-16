@@ -16,7 +16,8 @@ const routes: Routes = [
   { path: '', component: StartPageComponent },
   { path: 'new-project-start', component: NewProjectFormComponent},
   { path: 'new-project', component: NewProjectComponent},
-  { path: 'task-selection', component: TaskSelectionComponent }
+  { path: 'task-selection', component: TaskSelectionComponent},
+  { path: 'instance-segmentation', component: InstanceSegmentationComponent},
 ];
 
 @NgModule({

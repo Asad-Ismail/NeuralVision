@@ -11,6 +11,7 @@ from watchdog.events import FileSystemEventHandler
 import logging
 import signal
 import os
+from werkzeug.utils import secure_filename
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -76,7 +77,7 @@ def new_project():
     return jsonify({'status': 'success'})
 
 
-@app.route('/api/upload', methods=['POST'])
+@app.route('/api/uploadimages', methods=['POST'])
 def upload_images():
     if 'images' not in request.files:
         return {'error': 'No images found'}, 400
@@ -90,7 +91,27 @@ def upload_images():
 
     return {'message': 'Images uploaded successfully'}, 200
 
+@app.route('/api/uploaddata', methods=['POST'])
+def upload():
+    if request.method == 'POST':
+        images = request.files.getlist('images')
+        labels = request.files.getlist('labels')
 
+        if len(images) != len(labels):
+            return jsonify({'error': 'The number of image files and label files should be the same'}), 400
+
+        for image, label in zip(images, labels):
+            image_filename = secure_filename(image.filename)
+            label_filename = secure_filename(label.filename)
+
+            image.save(os.path.join(app.config['UPLOAD_FOLDER'], image_filename))
+            label.save(os.path.join(app.config['UPLOAD_FOLDER'], label_filename))
+
+        return jsonify({'message': 'Files uploaded successfully'})
+    else:
+        return jsonify({'error': 'Invalid request method'}), 405
+    
+    
 @app.route('/api/set_hyperparameters', methods=['POST'])
 def set_hyperparameters():
     hyperparameters = request.get_json()

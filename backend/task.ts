@@ -10,9 +10,7 @@ import { Router } from '@angular/router';
   templateUrl: './instance-segmentation.component.html',
   styleUrls: ['./instance-segmentation.component.css']
 })
-
-
-export class InstanceSegmentationComponent implements OnInit, OnDestroy{
+export class InstanceSegmentationComponent implements OnInit, OnDestroy {
 
   logs: string = '';
   metrics: any[] = [];
@@ -25,8 +23,6 @@ export class InstanceSegmentationComponent implements OnInit, OnDestroy{
 
   imagePreviews: string[] = [];
   imagesUploaded = false;
-  labelFileNames: string[] = [];
-  labelsUploaded = false;
 
   onFileSelect(event: any) {
     this.imagePreviews = [];
@@ -44,49 +40,24 @@ export class InstanceSegmentationComponent implements OnInit, OnDestroy{
     }
   }
 
-  onLabelFileSelect(event: any) {
-    this.labelFileNames = [];
-    const files = event.target.files;
-  
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      this.labelFileNames.push(file.name);
-    }
-  }
-  
-
+  // Input Images upload
   async uploadImagesInChunks() {
     this.uploadInProgress = true;
     this.uploadProgress = 0;
     const chunkSize = 10; // Number of images to upload in each chunk
     const imageInput = document.getElementById('imageInput') as HTMLInputElement;
-    const labelInput = document.getElementById('labelInput') as HTMLInputElement;
   
-    if (imageInput.files && labelInput.files) {
-      const imageFiles = Array.from(imageInput.files);
-      const labelFiles = Array.from(labelInput.files);
+    if (imageInput.files) {
+      const files = Array.from(imageInput.files);
   
-      if (imageFiles.length !== labelFiles.length) {
-        console.error('The number of image files and label files should be the same');
-        this.uploadInProgress = false;
-        return;
-      }
-  
-      for (let i = 0; i < imageFiles.length; i += chunkSize) {
+      for (let i = 0; i < files.length; i += chunkSize) {
         const formData = new FormData();
-        const imageChunk = imageFiles.slice(i, i + chunkSize);
-        const labelChunk = labelFiles.slice(i, i + chunkSize);
+        const chunk = files.slice(i, i + chunkSize);
   
-        for (const file of imageChunk) {
-          formData.append('images', file);
-        }
-  
-        for (const file of labelChunk) {
-          formData.append('labels', file);
-        }
+        for (const file of chunk) {formData.append('images', file);}
   
         try {
-          const response = await this.http.post('http://localhost:5000/api/uploaddata', formData).toPromise();
+          const response = await this.http.post('http://localhost:5000/api/upload', formData).toPromise();
           console.log(response);
         } catch (error) {
           console.error('Upload failed for chunk', error);
@@ -94,12 +65,11 @@ export class InstanceSegmentationComponent implements OnInit, OnDestroy{
         }
       }
       this.imagesUploaded = true;
-      this.labelsUploaded = true;
       // When the upload is completed
       this.uploadInProgress = false;
     }
+    
   }
-  
   
   reset() {
     this.logs = '';
@@ -127,7 +97,6 @@ export class InstanceSegmentationComponent implements OnInit, OnDestroy{
     );  
   }  
 
-
   public lineChartData: ChartDataset[] = [
     {
       data: [],
@@ -147,19 +116,18 @@ export class InstanceSegmentationComponent implements OnInit, OnDestroy{
   uploadProgress = 0;
   showSteps = false;
 
-  constructor(private http: HttpClient, private ngZone: NgZone,private router: Router) 
-  
-  {
+
+  constructor(private http: HttpClient, private ngZone: NgZone, private router: Router) {
     this.socket = io('http://localhost:5000');
     // Initialize the hyperparameters form with default values
     this.hyperparametersForm = new FormGroup({
       learningRate: new FormControl(0.001, Validators.required),
-      // Add more form controls if needed
       epochs: new FormControl(50, Validators.required),
       batchSize: new FormControl(32, Validators.required),
-      algorithmType: new FormControl('MOCO', Validators.required)
+      algorithmType: new FormControl('MaskRCNN', Validators.required) // Changed algorithm type to 'MaskRCNN'
     });
   }
+
 
     // Add a new method to submit hyperparameters
     submitHyperparameters() {
