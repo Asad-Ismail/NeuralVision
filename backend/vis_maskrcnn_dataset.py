@@ -27,12 +27,13 @@ def visualize_dataset(dataset, idx):
 
     plt.show()
 
-# Load the dataset
-data_module = COCODataModule("path/to/your/dataset")
-data_module.setup()
+if __name__=="__main__":
+    # Load the dataset
+    data_module = COCODataModule("/home/asad/Downloads/Balloons.v15i.coco-segmentation/train/combined")
+    data_module.setup()
 
-# Visualize an example from the training set
-visualize_dataset(data_module.train_dataset, 0)
+    # Visualize an example from the training set
+    visualize_dataset(data_module.train_dataset, 0)
 
-# Visualize an example from the validation set
-visualize_dataset(data_module.val_dataset, 0)
+    # Visualize an example from the validation set
+    visualize_dataset(data_module.val_dataset, 0)
