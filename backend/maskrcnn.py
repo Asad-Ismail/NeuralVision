@@ -16,23 +16,37 @@ from torch.utils.data import Dataset
 import json
 from pycocotools.mask import decode as mask_decode
 import logging
+import numpy as np
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
+def decode_mask_list(mask_list_points,height,width):
+    """
+    Decode a list of masks to a list of binary masks
+    :param mask_list: List of masks
+    :return: List of binary masks
+    """
+    binary_mask = torch.zeros((height,width),dtype=torch.uint8)
+    for point in mask_list_points:
+        binary_mask[point[1],point[0]] = 1
+    return binary_mask
+
+
 def load_annotations(json_path):
     with open(json_path) as f:
         data = json.load(f)
-    logger.info(f"Annotations data keys are {data.keys()}")
+    #logger.info(f"Annotations data keys are {data.keys()}")
     annotations = []
-    for item in data:
+    for i,item in enumerate(data["annotations"]):
+        print(item)
         ann = {
             "bbox": item["bbox"],
             "category_id": item["category_id"],
             "iscrowd": item["iscrowd"],
             "area": item["area"],
-            "masks": mask_decode(item["segmentation"])
+            "masks": decode_mask_list(item["segmentation"],data["images"][0]['height'],data["images"][0]['width'])
         }
         annotations.append(ann)
     return annotations
@@ -65,12 +79,15 @@ class CustomDataset(Dataset):
         if self.transform:
             image = self.transform(image)
         logger.info(f"Annotations are {annotations}")
+        
+        for ann in annotations:
+            logger.info(f"Annotations masks shape are {ann['masks'].shape}")
 
         # Create the target dictionary
         target = {
             "boxes": torch.tensor([ann["bbox"] for ann in annotations], dtype=torch.float32),
             "labels": torch.tensor([ann["category_id"] for ann in annotations], dtype=torch.int64),
-            "masks": torch.tensor([ann["masks"] for ann in annotations], dtype=torch.uint8),
+            "masks": torch.stack([ann["masks"] for ann in annotations], dim=0),
             "image_id": torch.tensor([idx], dtype=torch.int64),
             "area": torch.tensor([ann["area"] for ann in annotations], dtype=torch.float32),
             "iscrowd": torch.tensor([ann["iscrowd"] for ann in annotations], dtype=torch.int64)
