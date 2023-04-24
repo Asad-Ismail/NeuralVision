@@ -15,11 +15,16 @@ from PIL import Image
 from torch.utils.data import Dataset
 import json
 from pycocotools.mask import decode as mask_decode
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 
 def load_annotations(json_path):
     with open(json_path) as f:
         data = json.load(f)
-
+    logger.info(f"Annotations data keys are {data.keys()}")
     annotations = []
     for item in data:
         ann = {
@@ -39,6 +44,9 @@ class CustomDataset(Dataset):
         self.transform = transform
         self.image_paths = sorted(glob.glob(os.path.join(root_dir, "images", "*.jpg")))
         self.json_paths = sorted(glob.glob(os.path.join(root_dir, "annotations", "*.json")))
+        logger.info(os.path.join(root_dir, "images"))
+        logger.info(f"Number of images are {len(self.image_paths)}")
+        logger.info(f"Number of annotations are {len(self.json_paths)}")
 
     def __len__(self):
         return len(self.image_paths)
@@ -56,6 +64,7 @@ class CustomDataset(Dataset):
         # Apply the transforms if provided
         if self.transform:
             image = self.transform(image)
+        logger.info(f"Annotations are {annotations}")
 
         # Create the target dictionary
         target = {
@@ -106,7 +115,13 @@ def get_instance_segmentation_model(num_classes, backbone_name, dim):
     rpn_head = torchvision.models.detection.rpn.RPNHead(backbone_out_channels, anchor_generator.num_anchors_per_location()[0])
 
     # Create the RPN
-    rpn = torchvision.models.detection.rpn.RegionProposalNetwork(anchor_generator, rpn_head, 0.7, 2000, 1000)
+    positive_fraction = 0.5
+    pre_nms_top_n = {"training": 2000, "testing": 1000}
+    post_nms_top_n = {"training": 2000, "testing": 1000}
+    nms_thresh = 0.7
+
+    rpn = torchvision.models.detection.rpn.RegionProposalNetwork(
+        anchor_generator, rpn_head, 0.7, 2000, 1000, positive_fraction, pre_nms_top_n, post_nms_top_n, nms_thresh)
 
     # Create the box head for the Mask R-CNN model
     box_head = torchvision.models.detection.roi_heads.TwoMLPHead(backbone_out_channels * 7 * 7, 1024)
@@ -182,29 +197,30 @@ class InstanceSegmentationModel(pl.LightningModule):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
         return optimizer
 
-# Set the number of classes, backbone, and dimension
-num_classes = 2  # 1 class (person) + 1 background class
-backbone_name = "resnet50"  # You can use any other backbone supported by timm
-dim = 2048  # Feature dimension, you can set it according to the backbone used
+if __name__=="__main__":
+    # Set the number of classes, backbone, and dimension
+    num_classes = 2  # 1 class (person) + 1 background class
+    backbone_name = "resnet50"  # You can use any other backbone supported by timm
+    dim = 2048  # Feature dimension, you can set it according to the backbone used
 
-# Initialize the Lightning module
-lightning_module = InstanceSegmentationModel(num_classes, backbone_name, dim)
+    # Initialize the Lightning module
+    lightning_module = InstanceSegmentationModel(num_classes, backbone_name, dim)
 
-# Set the path to the COCO dataset
-coco_data_dir = "/path/to/coco/dataset"
+    # Set the path to the COCO dataset
+    coco_data_dir = "/path/to/coco/dataset"
 
-# Initialize the data module
-data_module = COCODataModule(coco_data_dir)
+    # Initialize the data module
+    data_module = COCODataModule(coco_data_dir)
 
-# Initialize the trainer
-trainer = Trainer(gpus=1, max_epochs=10, progress_bar_refresh_rate=20)
+    # Initialize the trainer
+    trainer = Trainer(gpus=1, max_epochs=10, progress_bar_refresh_rate=20)
 
-# Start the training
-trainer.fit(lightning_module, data_module)
+    # Start the training
+    trainer.fit(lightning_module, data_module)
 
 
-# Assuming the lightning_module is an instance of InstanceSegmentationModel
-#lightning_module.eval()  # Set the model to evaluation mode
-#with torch.no_grad():
-#    images = ...  # Load your images as a batch of tensors
-#    predictions = lightning_module(images)
+    # Assuming the lightning_module is an instance of InstanceSegmentationModel
+    #lightning_module.eval()  # Set the model to evaluation mode
+    #with torch.no_grad():
+    #    images = ...  # Load your images as a batch of tensors
+    #    predictions = lightning_module(images)

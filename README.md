@@ -1,5 +1,5 @@
 # PixelVisionX
-Provides no code implementation of instance segmentation
+Provides no code implementation of self supervised learning + downstream cpomputer vision tasks
 
 
 

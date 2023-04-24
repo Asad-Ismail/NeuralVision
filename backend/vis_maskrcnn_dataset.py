@@ -29,7 +29,7 @@ def visualize_dataset(dataset, idx):
 
 if __name__=="__main__":
     # Load the dataset
-    data_module = COCODataModule("/home/asad/Downloads/Balloons.v15i.coco-segmentation/train/combined")
+    data_module = COCODataModule("/home/asad/Downloads/Balloons.v15i.coco-segmentation/")
     data_module.setup()
 
     # Visualize an example from the training set
