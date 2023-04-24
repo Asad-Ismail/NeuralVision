@@ -17,6 +17,7 @@ import json
 from pycocotools.mask import decode as mask_decode
 import logging
 import numpy as np
+import cv2
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -28,9 +29,15 @@ def decode_mask_list(mask_list_points,height,width):
     :param mask_list: List of masks
     :return: List of binary masks
     """
-    binary_mask = torch.zeros((height,width),dtype=torch.uint8)
-    for point in mask_list_points:
-        binary_mask[point[1],point[0]] = 1
+    binary_mask = np.zeros((height,width),dtype=np.uint8)
+    print(f"Binary mask shape is {binary_mask.shape}")
+    for points in mask_list_points:
+        # Reshape the flattened list into a list of 2D points
+        np_points = np.array(points).reshape(-1, 2).astype(np.int32)
+        contour = [np_points]  
+        binary_mask = cv2.drawContours(binary_mask, contour, -1, 1, -1) 
+    binary_mask=torch.tensor(binary_mask)
+    print(f"Total points are {binary_mask.sum()}")
     return binary_mask
 
 
