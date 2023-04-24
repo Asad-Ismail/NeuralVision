@@ -44,8 +44,7 @@ def load_annotations(json_path):
         data = json.load(f)
     #logger.info(f"Annotations data keys are {data.keys()}")
     annotations = []
-    for i,item in enumerate(data["annotations"]):
-        print(item)
+    for item in data["annotations"]:
         ann = {
             "bbox": item["bbox"],
             "category_id": item["category_id"],
@@ -63,9 +62,6 @@ class CustomDataset(Dataset):
         self.transform = transform
         self.image_paths = sorted(glob.glob(os.path.join(root_dir, "images", "*.jpg")))
         self.json_paths = sorted(glob.glob(os.path.join(root_dir, "annotations", "*.json")))
-        logger.info(os.path.join(root_dir, "images"))
-        logger.info(f"Number of images are {len(self.image_paths)}")
-        logger.info(f"Number of annotations are {len(self.json_paths)}")
 
     def __len__(self):
         return len(self.image_paths)
@@ -83,10 +79,6 @@ class CustomDataset(Dataset):
         # Apply the transforms if provided
         if self.transform:
             image = self.transform(image)
-        logger.info(f"Annotations are {annotations}")
-        
-        for ann in annotations:
-            logger.info(f"Annotations masks shape are {ann['masks'].shape}")
 
         # Create the target dictionary
         target = {
@@ -97,7 +89,7 @@ class CustomDataset(Dataset):
             "area": torch.tensor([ann["area"] for ann in annotations], dtype=torch.float32),
             "iscrowd": torch.tensor([ann["iscrowd"] for ann in annotations], dtype=torch.int64)
         }
-
+        
         return image, target
 
 
