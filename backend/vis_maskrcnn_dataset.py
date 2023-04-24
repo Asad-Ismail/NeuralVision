@@ -21,8 +21,6 @@ def visualize_dataset(dataset, idx):
         x, y, w, h = bbox.numpy()
         rect = patches.Rectangle((x, y), w, h, linewidth=1, edgecolor='r', facecolor='none')
         ax.add_patch(rect)
-        # Overlay the mask on the image
-        cv2.imwrite(f"mask_{idx}.png", mask.numpy().astype(np.uint8) * 255)
         mask_np = mask.numpy().astype(np.float32)
         ax.imshow(np.ma.masked_array(mask_np, mask_np == 0), alpha=0.4, cmap="jet")
         idx+=1
@@ -35,7 +33,7 @@ if __name__=="__main__":
     data_module.setup()
 
     # Visualize an example from the training set
-    visualize_dataset(data_module.train_dataset, 0)
+    visualize_dataset(data_module.train_dataset, 10)
 
     # Visualize an example from the validation set
-    visualize_dataset(data_module.val_dataset, 0)
+    #visualize_dataset(data_module.val_dataset, 0)
