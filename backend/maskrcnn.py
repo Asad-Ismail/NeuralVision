@@ -17,6 +17,7 @@ from pycocotools.mask import decode as mask_decode
 import logging
 import numpy as np
 import cv2
+from collections import OrderedDict
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -121,58 +122,32 @@ class CustomTimmModel(torch.nn.Module):
     def __init__(self, backbone_name, pretrained=True, features_only=True):
         super().__init__()
         self.backbone = timm.create_model(backbone_name, pretrained=pretrained, features_only=features_only)
+        self.out_channels = self.backbone.feature_info.channels()[-1]
 
     def forward(self, x):
         # Call the forward() method of the timm model
         feature_maps = self.backbone(x)
         
-        # Convert the list of feature maps to an ordered dictionary
-        feature_maps_dict = OrderedDict((i, fmap) for i, fmap in enumerate(feature_maps))
-
-        return feature_maps_dict
+        return feature_maps[-1]
 
 def get_instance_segmentation_model(backbone_name,num_classes):
     # Load the backbone from timm
     backbone = CustomTimmModel(backbone_name, pretrained=True, features_only=True)
-    # Get the number of output channels from the backbone
-    backbone_out_channels = backbone.backbone.feature_info.channels()[-1]
 
-    print(backbone_out_channels)
-    return
+    anchor_generator = AnchorGenerator(sizes=((32, 64, 128, 256, 512),),aspect_ratios=((0.5, 1.0, 2.0),))
 
-    # Create an anchor generator for the RPN
-    anchor_generator = torchvision.models.detection.rpn.AnchorGenerator(sizes=((32, 64, 128, 256, 512),),
-                                                                        aspect_ratios=((0.5, 1.0, 2.0),))
+    roi_pooler = torchvision.ops.MultiScaleRoIAlign(featmap_names=['0'],output_size=7,sampling_ratio=2)
+    mask_roi_pooler = torchvision.ops.MultiScaleRoIAlign(featmap_names=['0'],output_size=14,sampling_ratio=2)
 
-    # Create the Region Proposal Network (RPN) head
-    rpn_head = torchvision.models.detection.rpn.RPNHead(backbone_out_channels, anchor_generator.num_anchors_per_location()[0])
 
-    # Create the RPN
-    positive_fraction = 0.5
-    pre_nms_top_n = {"training": 2000, "testing": 1000}
-    post_nms_top_n = {"training": 2000, "testing": 1000}
-    nms_thresh = 0.7
-
-    rpn = torchvision.models.detection.rpn.RegionProposalNetwork(
-        anchor_generator, rpn_head, 0.7, 2000, 1000, positive_fraction, pre_nms_top_n, post_nms_top_n, nms_thresh)
-
-    # Create the box head for the Mask R-CNN model
-    box_head = torchvision.models.detection.roi_heads.TwoMLPHead(backbone_out_channels * 7 * 7, 1024)
-
-    # Create the box predictor for the Mask R-CNN model
-    box_predictor = FastRCNNPredictor(1024, num_classes)
-
-    # Create the mask head for the Mask R-CNN model
-    mask_head = torchvision.models.detection.roi_heads.MaskRCNNHeads(backbone_out_channels, 1024, num_classes)
-
-    # Create the mask predictor for the Mask R-CNN model
-    mask_predictor = MaskRCNNPredictor(1024, 256, num_classes)
-
-    # Assemble the Mask R-CNN model using the custom backbone and heads
-    model = MaskRCNN(backbone, rpn, box_head, box_predictor, mask_head, mask_predictor)
+    # put the pieces together inside a MaskRCNN model
+    model = MaskRCNN(backbone,
+     num_classes=2,
+     rpn_anchor_generator=anchor_generator,
+     box_roi_pool=roi_pooler,
+     mask_roi_pool=mask_roi_pooler)
 
     return model
-
 
 
 class InstanceSegmentationModel(pl.LightningModule):
@@ -183,7 +158,7 @@ class InstanceSegmentationModel(pl.LightningModule):
         self.model = get_instance_segmentation_model(num_classes, backbone_name)
 
     def forward(self, x, targets=None):
-        if self.training or targets is not None:
+        if self.training and targets is not None:
             return self.model(x, targets)
         else:
             return self.model(x)
@@ -234,10 +209,15 @@ if __name__=="__main__":
     # Set the number of classes, backbone, and dimension
     num_classes = 2  # 1 class (person) + 1 background class
     backbone_name = "resnet18"  # You can use any other backbone supported by timm
-    dim = 2048  # Feature dimension, you can set it according to the backbone used
 
-    # Initialize the Lightning module
+
     lightning_module = InstanceSegmentationModel(backbone_name,num_classes)
+    
+    lightning_module.eval()
+    x = [torch.rand(3, 300, 400)]
+    predictions = lightning_module(x)
+
+    print(predictions[0]["masks"].shape)
 
     exit()
 
