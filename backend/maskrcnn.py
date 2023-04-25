@@ -5,8 +5,7 @@ from torchvision.datasets import CocoDetection
 from torchvision.transforms import ToTensor
 import torchvision
 from torchvision.models.detection import MaskRCNN
-from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
-from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor
+from torchvision.models.detection.anchor_utils import AnchorGenerator
 from pytorch_lightning import Trainer
 import timm
 import os
@@ -117,12 +116,29 @@ class COCODataModule(pl.LightningDataModule):
     def val_dataloader(self):
         return DataLoader(self.val_dataset, batch_size=self.batch_size, shuffle=False, num_workers=self.num_workers)
 
+# To return dict of features instead of list
+class CustomTimmModel(torch.nn.Module):
+    def __init__(self, backbone_name, pretrained=True, features_only=True):
+        super().__init__()
+        self.backbone = timm.create_model(backbone_name, pretrained=pretrained, features_only=features_only)
 
-def get_instance_segmentation_model(num_classes, backbone_name, dim):
+    def forward(self, x):
+        # Call the forward() method of the timm model
+        feature_maps = self.backbone(x)
+        
+        # Convert the list of feature maps to an ordered dictionary
+        feature_maps_dict = OrderedDict((i, fmap) for i, fmap in enumerate(feature_maps))
+
+        return feature_maps_dict
+
+def get_instance_segmentation_model(backbone_name,num_classes):
     # Load the backbone from timm
-    backbone = timm.create_model(backbone_name, pretrained=True, features_only=True, num_classes=dim)
+    backbone = CustomTimmModel(backbone_name, pretrained=True, features_only=True)
     # Get the number of output channels from the backbone
-    backbone_out_channels = backbone.feature_info.channels()[-1]
+    backbone_out_channels = backbone.backbone.feature_info.channels()[-1]
+
+    print(backbone_out_channels)
+    return
 
     # Create an anchor generator for the RPN
     anchor_generator = torchvision.models.detection.rpn.AnchorGenerator(sizes=((32, 64, 128, 256, 512),),
@@ -160,11 +176,11 @@ def get_instance_segmentation_model(num_classes, backbone_name, dim):
 
 
 class InstanceSegmentationModel(pl.LightningModule):
-    def __init__(self, num_classes, backbone_name, dim, learning_rate=0.001):
+    def __init__(self, num_classes, backbone_name, learning_rate=0.001):
         super().__init__()
 
         self.learning_rate = learning_rate
-        self.model = get_instance_segmentation_model(num_classes, backbone_name, dim)
+        self.model = get_instance_segmentation_model(num_classes, backbone_name)
 
     def forward(self, x, targets=None):
         if self.training or targets is not None:
@@ -217,11 +233,13 @@ class InstanceSegmentationModel(pl.LightningModule):
 if __name__=="__main__":
     # Set the number of classes, backbone, and dimension
     num_classes = 2  # 1 class (person) + 1 background class
-    backbone_name = "resnet50"  # You can use any other backbone supported by timm
+    backbone_name = "resnet18"  # You can use any other backbone supported by timm
     dim = 2048  # Feature dimension, you can set it according to the backbone used
 
     # Initialize the Lightning module
-    lightning_module = InstanceSegmentationModel(num_classes, backbone_name, dim)
+    lightning_module = InstanceSegmentationModel(backbone_name,num_classes)
+
+    exit()
 
     # Set the path to the COCO dataset
     coco_data_dir = "/path/to/coco/dataset"
