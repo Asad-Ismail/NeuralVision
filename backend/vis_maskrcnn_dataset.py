@@ -22,7 +22,7 @@ def visualize_dataset(dataset, idx):
         rect = patches.Rectangle((x, y), w, h, linewidth=1, edgecolor='r', facecolor='none')
         ax.add_patch(rect)
         mask_np = mask.numpy().astype(np.float32)
-        ax.imshow(np.ma.masked_array(mask_np, mask_np == 0), alpha=0.4, cmap="jet")
+        ax.imshow(np.ma.masked_array(mask_np, mask_np == 0), alpha=0.7, cmap="jet")
         idx+=1
 
     plt.show()
@@ -36,4 +36,4 @@ if __name__=="__main__":
     visualize_dataset(data_module.train_dataset, 10)
 
     # Visualize an example from the validation set
-    #visualize_dataset(data_module.val_dataset, 0)
+    visualize_dataset(data_module.val_dataset, 0)

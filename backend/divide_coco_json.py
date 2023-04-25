@@ -34,7 +34,7 @@ def divide_coco_json(input_json_file, output_directory):
     print(f"JSON files created in the '{output_directory}' directory.")
 
 if __name__ == '__main__':
-    input_json_file = '/home/asad/Downloads/Balloons.v15i.coco-segmentation/train/_annotations.coco.json'
-    output_directory = '/home/asad/Downloads/Balloons.v15i.coco-segmentation/train/annoations'
+    input_json_file = '/home/asad/Downloads/Balloons.v15i.coco-segmentation/valid/_annotations.coco.json'
+    output_directory = '/home/asad/Downloads/Balloons.v15i.coco-segmentation/valid/annotations'
     divide_coco_json(input_json_file, output_directory)   
 

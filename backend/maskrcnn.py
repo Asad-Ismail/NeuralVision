@@ -63,6 +63,9 @@ class CustomDataset(Dataset):
         self.image_paths = sorted(glob.glob(os.path.join(root_dir, "images", "*.jpg")))
         self.json_paths = sorted(glob.glob(os.path.join(root_dir, "annotations", "*.json")))
 
+        print(f"Images length {len(self.image_paths)}")
+        print(f"Labels length {len(self.json_paths)}")
+        
     def __len__(self):
         return len(self.image_paths)
 
@@ -106,7 +109,7 @@ class COCODataModule(pl.LightningDataModule):
 
         # Load the custom dataset
         self.train_dataset = CustomDataset(os.path.join(self.data_dir, "train"), transform=transforms)
-        self.val_dataset = CustomDataset(os.path.join(self.data_dir, "val"), transform=transforms)
+        self.val_dataset = CustomDataset(os.path.join(self.data_dir, "valid"), transform=transforms)
 
     def train_dataloader(self):
         return DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers)
