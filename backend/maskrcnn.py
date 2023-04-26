@@ -22,6 +22,7 @@ import json
 from pycocotools.coco import COCO
 from pycocotools.cocoeval import COCOeval
 from pycocotools import mask as cocomask
+from pytorch_lightning.callbacks import ModelCheckpoint
 
 
 logging.basicConfig(level=logging.INFO)
@@ -349,8 +350,20 @@ if __name__=="__main__":
     # Initialize the data module
     data_module = COCODataModule(coco_data_dir)
 
-    # Initialize the trainer
-    trainer = Trainer(accelerator="gpu", max_epochs=10)
+    
+    # Create a ModelCheckpoint callback to save the best model and the last model weights
+    checkpoint_callback = ModelCheckpoint(
+        dirpath="model_checkpoints",
+        filename="best_model_and_last_weights-{epoch:02d}-{val_loss:.2f}",
+        save_top_k=1,
+        verbose=True,
+        monitor="train_loss",
+        mode="min",
+        save_last=True,
+    )
+    
+    # Initialize the trainer    
+    trainer = Trainer(accelerator="gpu", max_epochs=30, callbacks=[checkpoint_callback])
 
     # Start the training
     trainer.fit(lightning_module, data_module)
