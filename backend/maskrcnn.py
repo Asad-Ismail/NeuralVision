@@ -370,8 +370,8 @@ def visualize_predictions(image,preds,score_threshold=0.5):
 
 def main(perform_inference=False):
     # Set the number of classes, backbone, and dimension
-    num_classes = 2  # 1 class (person) + 1 background class
-    backbone_name = "resnet18"  # You can use any other backbone supported by timm
+    num_classes = 2  # 1 class (balloon) + 1 background class
+    backbone_name = "resnet50"  # You can use any other backbone supported by timm
 
     lightning_module = InstanceSegmentationModel(backbone_name, num_classes,learning_rate=1e-4)
     # Set the path to the COCO dataset
@@ -403,7 +403,7 @@ def main(perform_inference=False):
         lightning_module.eval()  # Set the model to evaluation mode
         with torch.no_grad():  # Disable gradient calculation for the model
             for i,data in enumerate(data_module.val_dataloader()):
-                if i<1:
+                if i<2:
                     continue
                 # Get the first batch of data
                 images, targets = data
@@ -420,4 +420,4 @@ def main(perform_inference=False):
                     break
 
 if __name__ == "__main__":
-    main(perform_inference=False)
+    main(perform_inference=True)
