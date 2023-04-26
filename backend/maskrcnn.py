@@ -221,7 +221,6 @@ class InstanceSegmentationModel(pl.LightningModule):
                 bbox = [x1, y1, w, h]
                 mask[mask>0.5]=1
                 mask=mask.squeeze(0)
-                print(f"Mask shape is {mask.shape} and min and max are {mask.min(),mask.max()} and sum is {mask.sum()}")
                 h,w=mask.shape
                 rle_mask = rle_mask = cocomask.encode(np.asfortranarray(mask.numpy().astype(np.uint8)))
                 area = float(mask.sum().item())
