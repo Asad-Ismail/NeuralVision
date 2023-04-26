@@ -21,7 +21,7 @@ from collections import OrderedDict
 import json
 from pycocotools.coco import COCO
 from pycocotools.cocoeval import COCOeval
-from pycocotools import mask
+from pycocotools import mask as cocomask
 
 
 logging.basicConfig(level=logging.INFO)
@@ -175,6 +175,9 @@ class InstanceSegmentationModel(pl.LightningModule):
         self.model = get_instance_segmentation_model(num_classes, backbone_name)
         self.all_preds = []
         self.all_targets = []
+        # For coco evaluation
+        self.img_idx = 0
+        self.ann_id = 0
 
     def forward(self, x, targets=None):
         if self.training and targets is not None:
@@ -204,20 +207,22 @@ class InstanceSegmentationModel(pl.LightningModule):
     def on_validation_epoch_start(self):
         self.all_preds = []
         self.all_targets = []
+        self.img_idx = 0
+        self.ann_id = 0
         
-
     def convert_predictions_to_coco_format(self, preds):
         coco_preds = []
         for pred_idx, pred in enumerate(preds):
+            img_id = self.img_idx + pred_idx
             for box, label, score, mask in zip(pred["boxes"], pred["labels"], pred["scores"], pred["masks"]):
                 x1, y1, x2, y2 = box.tolist()
                 w, h = x2 - x1, y2 - y1
                 bbox = [x1, y1, w, h]
 
-                rle_mask = rle_mask = mask.encode(np.asfortranarray(mask.numpy().astype(np.uint8)))
+                rle_mask = rle_mask = cocomask.encode(np.asfortranarray(mask.numpy().astype(np.uint8)))
 
                 coco_pred = {
-                    "image_id": pred_idx,
+                    "image_id": img_id,
                     "category_id": label.item(),
                     "bbox": bbox,
                     "score": score.item(),
@@ -228,18 +233,18 @@ class InstanceSegmentationModel(pl.LightningModule):
     
     def convert_targets_to_coco_format(self, targets):
         coco_targets = []
-        ann_id = 0
         for img_idx, target in enumerate(targets):
+            img_id = self.img_idx + img_idx
             for box, label, mask, area, iscrowd in zip(target["boxes"], target["labels"], target["masks"], target["area"], target["iscrowd"]):
                 x1, y1, x2, y2 = box.tolist()
                 w, h = x2 - x1, y2 - y1
                 bbox = [x1, y1, w, h]
 
-                rle_mask = mask.encode(np.asfortranarray(mask.numpy().astype(np.uint8)))
+                rle_mask = cocomask.encode(np.asfortranarray(mask.numpy().astype(np.uint8)))
 
                 coco_target = {
-                    "id": ann_id,
-                    "image_id": img_idx,
+                    "id": self.ann_id,
+                    "image_id": img_id,
                     "category_id": label.item(),
                     "bbox": bbox,
                     "area": area.item(),
@@ -247,7 +252,7 @@ class InstanceSegmentationModel(pl.LightningModule):
                     "iscrowd": iscrowd.item()
                 }
                 coco_targets.append(coco_target)
-                ann_id += 1
+                self.ann_id += 1
         return coco_targets
 
     def validation_step(self, batch,batch_idx):
@@ -264,8 +269,10 @@ class InstanceSegmentationModel(pl.LightningModule):
         # Add predictions and ground truth to lists
         self.all_preds.append(coco_preds)
         self.all_targets.append(coco_targets)
+        
+        self.img_idx += len(images)
 
-    def validation_epoch_end(self, outputs):
+    def on_validation_epoch_end(self, outputs):
         # Combine all predictions and ground truth from the validation set
         combined_preds = np.concatenate(self.all_preds, axis=0)
         combined_targets = np.concatenate(self.all_targets, axis=0)
@@ -303,6 +310,7 @@ class InstanceSegmentationModel(pl.LightningModule):
         mask_ap = mask_eval.stats[0]
 
         return box_ap, mask_ap
+    
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
         return optimizer
