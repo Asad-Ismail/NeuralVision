@@ -156,7 +156,7 @@ def get_instance_segmentation_model(backbone_name,num_classes):
     # Load the backbone from timm
     backbone = CustomTimmModel(backbone_name, pretrained=True, features_only=True)
     # Freeze the backbone
-    backbone.freeze()
+    #backbone.freeze()
 
     anchor_generator = AnchorGenerator(sizes=((32, 64, 128, 256, 512),),aspect_ratios=((0.5, 1.0, 2.0),))
 
