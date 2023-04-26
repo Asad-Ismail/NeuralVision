@@ -258,6 +258,9 @@ class InstanceSegmentationModel(pl.LightningModule):
     def validation_step(self, batch,batch_idx):
         #pass
         images, targets = batch
+        
+        images=[img.detach().cpu() for img in images]
+        targets = [{k: v.to("cpu") for k, v in t.items()} for t in targets]
 
         # Run the model on the images and targets
         preds = self.model(images, targets)
