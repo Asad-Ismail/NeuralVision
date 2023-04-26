@@ -208,10 +208,10 @@ class InstanceSegmentationModel(pl.LightningModule):
         self.all_preds = []
         self.all_targets = []
         self.img_idx = 0
-        self.ann_id = 0
         
     def convert_predictions_to_coco_format(self, preds):
         coco_preds = []
+        ann_id=0
         for pred_idx, pred in enumerate(preds):
             img_id = self.img_idx + pred_idx
             for box, label, score, mask in zip(pred["boxes"], pred["labels"], pred["scores"], pred["masks"]):
@@ -222,6 +222,7 @@ class InstanceSegmentationModel(pl.LightningModule):
                 rle_mask = rle_mask = cocomask.encode(np.asfortranarray(mask.numpy().astype(np.uint8)))
 
                 coco_pred = {
+                    "id": ann_id,
                     "image_id": img_id,
                     "category_id": label.item(),
                     "bbox": bbox,
@@ -233,6 +234,7 @@ class InstanceSegmentationModel(pl.LightningModule):
     
     def convert_targets_to_coco_format(self, targets):
         coco_targets = []
+        ann_id=0
         for img_idx, target in enumerate(targets):
             img_id = self.img_idx + img_idx
             for box, label, mask, area, iscrowd in zip(target["boxes"], target["labels"], target["masks"], target["area"], target["iscrowd"]):
@@ -243,7 +245,7 @@ class InstanceSegmentationModel(pl.LightningModule):
                 rle_mask = cocomask.encode(np.asfortranarray(mask.numpy().astype(np.uint8)))
 
                 coco_target = {
-                    "id": self.ann_id,
+                    "id": ann_id,
                     "image_id": img_id,
                     "category_id": label.item(),
                     "bbox": bbox,
@@ -252,18 +254,20 @@ class InstanceSegmentationModel(pl.LightningModule):
                     "iscrowd": iscrowd.item()
                 }
                 coco_targets.append(coco_target)
-                self.ann_id += 1
+                ann_id += 1
         return coco_targets
 
     def validation_step(self, batch,batch_idx):
         #pass
         images, targets = batch
-        
-        images=[img.detach().cpu() for img in images]
-        targets = [{k: v.to("cpu") for k, v in t.items()} for t in targets]
-
+    
         # Run the model on the images and targets
         preds = self.model(images, targets)
+        
+        # Convert everything to CPU
+        images=[img.detach().cpu() for img in images]
+        targets = [{k: v.to("cpu") for k, v in t.items()} for t in targets]
+        preds = [{k: v.to("cpu") for k, v in t.items()} for t in preds]
 
         # Convert predictions and targets to the COCO format
         coco_preds = self.convert_predictions_to_coco_format(preds)
@@ -275,7 +279,7 @@ class InstanceSegmentationModel(pl.LightningModule):
         
         self.img_idx += len(images)
 
-    def on_validation_epoch_end(self, outputs):
+    def on_validation_epoch_end(self):
         # Combine all predictions and ground truth from the validation set
         combined_preds = np.concatenate(self.all_preds, axis=0)
         combined_targets = np.concatenate(self.all_targets, axis=0)
