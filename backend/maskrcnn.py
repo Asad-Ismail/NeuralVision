@@ -18,6 +18,11 @@ import logging
 import numpy as np
 import cv2
 from collections import OrderedDict
+import json
+from pycocotools.coco import COCO
+from pycocotools.cocoeval import COCOeval
+from pycocotools import mask
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -168,6 +173,8 @@ class InstanceSegmentationModel(pl.LightningModule):
 
         self.learning_rate = learning_rate
         self.model = get_instance_segmentation_model(num_classes, backbone_name)
+        self.all_preds = []
+        self.all_targets = []
 
     def forward(self, x, targets=None):
         if self.training and targets is not None:
@@ -175,7 +182,7 @@ class InstanceSegmentationModel(pl.LightningModule):
         else:
             return self.model(x)
 
-    def training_step(self, batch):
+    def training_step(self, batch,batch_idx):
         images, targets = batch
 
         # Set the target's device to be the same as the model's device
@@ -194,25 +201,108 @@ class InstanceSegmentationModel(pl.LightningModule):
 
         return total_loss
 
-    def validation_step(self, batch):
-        pass
+    def on_validation_epoch_start(self):
+        self.all_preds = []
+        self.all_targets = []
+        
+
+    def convert_predictions_to_coco_format(self, preds):
+        coco_preds = []
+        for pred_idx, pred in enumerate(preds):
+            for box, label, score, mask in zip(pred["boxes"], pred["labels"], pred["scores"], pred["masks"]):
+                x1, y1, x2, y2 = box.tolist()
+                w, h = x2 - x1, y2 - y1
+                bbox = [x1, y1, w, h]
+
+                rle_mask = rle_mask = mask.encode(np.asfortranarray(mask.numpy().astype(np.uint8)))
+
+                coco_pred = {
+                    "image_id": pred_idx,
+                    "category_id": label.item(),
+                    "bbox": bbox,
+                    "score": score.item(),
+                    "segmentation": rle_mask,
+                }
+                coco_preds.append(coco_pred)
+        return coco_preds
+    
+    def convert_targets_to_coco_format(self, targets):
+        coco_targets = []
+        ann_id = 0
+        for img_idx, target in enumerate(targets):
+            for box, label, mask, area, iscrowd in zip(target["boxes"], target["labels"], target["masks"], target["area"], target["iscrowd"]):
+                x1, y1, x2, y2 = box.tolist()
+                w, h = x2 - x1, y2 - y1
+                bbox = [x1, y1, w, h]
+
+                rle_mask = mask.encode(np.asfortranarray(mask.numpy().astype(np.uint8)))
+
+                coco_target = {
+                    "id": ann_id,
+                    "image_id": img_idx,
+                    "category_id": label.item(),
+                    "bbox": bbox,
+                    "area": area.item(),
+                    "segmentation": rle_mask,
+                    "iscrowd": iscrowd.item()
+                }
+                coco_targets.append(coco_target)
+                ann_id += 1
+        return coco_targets
+
+    def validation_step(self, batch,batch_idx):
+        #pass
         images, targets = batch
-        # Set the target's device to be the same as the model's device
-        #targets = [{k: v.to(self.device) for k, v in t.items()} for t in targets]
 
         # Run the model on the images and targets
         preds = self.model(images, targets)
-        
-        # Calculate the total loss by summing individual losses
-        #total_loss = sum(loss for loss in loss_dict.values())
 
-        # Log the validation losses
-        #self.log("val_loss", total_loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
-        #for key, value in loss_dict.items():
-        #    self.log(f"val_{key}", value, on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        # Convert predictions and targets to the COCO format
+        coco_preds = self.convert_predictions_to_coco_format(preds)
+        coco_targets = self.convert_targets_to_coco_format(targets)
 
-        #return total_loss
+        # Add predictions and ground truth to lists
+        self.all_preds.append(coco_preds)
+        self.all_targets.append(coco_targets)
 
+    def validation_epoch_end(self, outputs):
+        # Combine all predictions and ground truth from the validation set
+        combined_preds = np.concatenate(self.all_preds, axis=0)
+        combined_targets = np.concatenate(self.all_targets, axis=0)
+
+        # Evaluate the predictions using COCO API
+        box_ap, mask_ap = self.evaluate_predictions(combined_preds, combined_targets)
+
+        # Log the results
+        self.log("val_box_mAP", box_ap, prog_bar=True, logger=True)
+        self.log("val_mask_mAP", mask_ap, prog_bar=True, logger=True)
+    
+    def evaluate_predictions(self, preds, targets):
+        # Create a COCO object for the ground truth
+        coco_gt = COCO()
+        coco_gt.dataset = {"images": [{"id": idx} for idx in range(len(targets))], "annotations": targets}
+        coco_gt.createIndex()
+
+        # Create a COCO object for the predictions
+        coco_preds = COCO()
+        coco_preds.dataset = {"images": [{"id": idx} for idx in range(len(preds))], "annotations": preds}
+        coco_preds.createIndex()
+
+        # Calculate box mAP
+        box_eval = COCOeval(coco_gt, coco_preds, iouType='bbox')
+        box_eval.evaluate()
+        box_eval.accumulate()
+        box_eval.summarize()
+        box_ap = box_eval.stats[0]
+
+        # Calculate mask mAP
+        mask_eval = COCOeval(coco_gt, coco_preds, iouType='segm')
+        mask_eval.evaluate()
+        mask_eval.accumulate()
+        mask_eval.summarize()
+        mask_ap = mask_eval.stats[0]
+
+        return box_ap, mask_ap
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
         return optimizer
