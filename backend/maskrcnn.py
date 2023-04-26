@@ -85,7 +85,7 @@ class CustomDataset(Dataset):
 
         # Create the target dictionary
         target = {
-            "boxes": torch.tensor([ann["bbox"] for ann in annotations], dtype=torch.float32),
+            "boxes": torch.tensor([[x, y, x + w, y + h] for x, y, w, h in [ann["bbox"] for ann in annotations]], dtype=torch.float32),
             "labels": torch.tensor([ann["category_id"] for ann in annotations], dtype=torch.int64),
             "masks": torch.stack([ann["masks"] for ann in annotations], dim=0),
             "image_id": torch.tensor([idx], dtype=torch.int64),
@@ -97,7 +97,7 @@ class CustomDataset(Dataset):
 
 
 class COCODataModule(pl.LightningDataModule):
-    def __init__(self, data_dir, batch_size=4, num_workers=4):
+    def __init__(self, data_dir, batch_size=2, num_workers=4):
         super().__init__()
         self.data_dir = data_dir
         self.batch_size = batch_size
@@ -110,12 +110,24 @@ class COCODataModule(pl.LightningDataModule):
         # Load the custom dataset
         self.train_dataset = CustomDataset(os.path.join(self.data_dir, "train"), transform=transforms)
         self.val_dataset = CustomDataset(os.path.join(self.data_dir, "valid"), transform=transforms)
+    
+    
+    def custom_collate_fn(self, batch):
+        images = [item[0] for item in batch]
+        targets = [item[1] for item in batch]
+        #print(f"The images length are {len(images)}")
+        #print(f"The targets length are {len(targets)}")
+        #print(f"Image shape is {images[0].shape}")
+        #print(f"Image min and max are  {images[0].min(),images[0].max()}")
+        #print(f"Target keys are {targets[0].keys()}") 
+        #print(f"Target masks min and max are  {targets[0]['masks'].min(),targets[0]['masks'].max()}") 
+        return images, targets
 
     def train_dataloader(self):
-        return DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers)
+        return DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers,collate_fn=self.custom_collate_fn)
 
     def val_dataloader(self):
-        return DataLoader(self.val_dataset, batch_size=self.batch_size, shuffle=False, num_workers=self.num_workers)
+        return DataLoader(self.val_dataset, batch_size=self.batch_size, shuffle=False, num_workers=self.num_workers,collate_fn=self.custom_collate_fn)
 
 # To return dict of features instead of list
 class CustomTimmModel(torch.nn.Module):
@@ -163,7 +175,7 @@ class InstanceSegmentationModel(pl.LightningModule):
         else:
             return self.model(x)
 
-    def training_step(self, batch, batch_idx):
+    def training_step(self, batch):
         images, targets = batch
 
         # Set the target's device to be the same as the model's device
@@ -182,24 +194,24 @@ class InstanceSegmentationModel(pl.LightningModule):
 
         return total_loss
 
-    def validation_step(self, batch, batch_idx):
+    def validation_step(self, batch):
+        pass
         images, targets = batch
-
         # Set the target's device to be the same as the model's device
-        targets = [{k: v.to(self.device) for k, v in t.items()} for t in targets]
+        #targets = [{k: v.to(self.device) for k, v in t.items()} for t in targets]
 
         # Run the model on the images and targets
-        loss_dict = self.model(images, targets)
-
+        preds = self.model(images, targets)
+        
         # Calculate the total loss by summing individual losses
-        total_loss = sum(loss for loss in loss_dict.values())
+        #total_loss = sum(loss for loss in loss_dict.values())
 
         # Log the validation losses
-        self.log("val_loss", total_loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
-        for key, value in loss_dict.items():
-            self.log(f"val_{key}", value, on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        #self.log("val_loss", total_loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        #for key, value in loss_dict.items():
+        #    self.log(f"val_{key}", value, on_step=True, on_epoch=True, prog_bar=True, logger=True)
 
-        return total_loss
+        #return total_loss
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
@@ -210,15 +222,12 @@ if __name__=="__main__":
     num_classes = 2  # 1 class (person) + 1 background class
     backbone_name = "resnet18"  # You can use any other backbone supported by timm
 
-
     lightning_module = InstanceSegmentationModel(backbone_name,num_classes)
     
     #lightning_module.eval()
     #x = [torch.rand(3, 300, 400)]
-    predictions = lightning_module(x)
-
+    #predictions = lightning_module(x)
     #print(predictions[0]["masks"].shape)
-
     #exit()
 
     # Set the path to the COCO dataset
@@ -228,7 +237,7 @@ if __name__=="__main__":
     data_module = COCODataModule(coco_data_dir)
 
     # Initialize the trainer
-    trainer = Trainer(gpus=1, max_epochs=10, progress_bar_refresh_rate=20)
+    trainer = Trainer(accelerator="gpu", max_epochs=10)
 
     # Start the training
     trainer.fit(lightning_module, data_module)
