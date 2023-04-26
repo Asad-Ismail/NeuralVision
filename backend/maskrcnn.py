@@ -390,7 +390,7 @@ def main(perform_inference=False):
             save_last=True,
         )
     # Initialize the trainer
-    trainer = Trainer(accelerator="gpu", max_epochs=60, callbacks=[checkpoint_callback])
+    trainer = Trainer(accelerator="gpu", max_epochs=100, callbacks=[checkpoint_callback])
 
     if not perform_inference:
         # Start the training
