@@ -213,16 +213,16 @@ if __name__=="__main__":
 
     lightning_module = InstanceSegmentationModel(backbone_name,num_classes)
     
-    lightning_module.eval()
-    x = [torch.rand(3, 300, 400)]
+    #lightning_module.eval()
+    #x = [torch.rand(3, 300, 400)]
     predictions = lightning_module(x)
 
-    print(predictions[0]["masks"].shape)
+    #print(predictions[0]["masks"].shape)
 
-    exit()
+    #exit()
 
     # Set the path to the COCO dataset
-    coco_data_dir = "/path/to/coco/dataset"
+    coco_data_dir = "/home/asad/Downloads/Balloons.v15i.coco-segmentation/"
 
     # Initialize the data module
     data_module = COCODataModule(coco_data_dir)
