@@ -220,6 +220,9 @@ class InstanceSegmentationModel(pl.LightningModule):
                 w, h = x2 - x1, y2 - y1
                 bbox = [x1, y1, w, h]
                 mask[mask>0.5]=1
+                mask=mask.squeeze(0)
+                print(f"Mask shape is {mask.shape} and min and max are {mask.min(),mask.max()} and sum is {mask.sum()}")
+                h,w=mask.shape
                 rle_mask = rle_mask = cocomask.encode(np.asfortranarray(mask.numpy().astype(np.uint8)))
                 area = float(mask.sum().item())
                 coco_pred = {
@@ -229,7 +232,9 @@ class InstanceSegmentationModel(pl.LightningModule):
                     "bbox": bbox,
                     "score": score.item(),
                     "segmentation": rle_mask,
-                    "area": area
+                    "area": area,
+                    "height": h,
+                    "width": w
                 }
                 coco_preds.append(coco_pred)
         return coco_preds
@@ -243,7 +248,7 @@ class InstanceSegmentationModel(pl.LightningModule):
                 x1, y1, x2, y2 = box.tolist()
                 w, h = x2 - x1, y2 - y1
                 bbox = [x1, y1, w, h]
-
+                h,w=mask.shape
                 rle_mask = cocomask.encode(np.asfortranarray(mask.numpy().astype(np.uint8)))
 
                 coco_target = {
@@ -253,14 +258,15 @@ class InstanceSegmentationModel(pl.LightningModule):
                     "bbox": bbox,
                     "area": area.item(),
                     "segmentation": rle_mask,
-                    "iscrowd": iscrowd.item()
+                    "iscrowd": iscrowd.item(),
+                    "height": h,
+                    "width": w
                 }
                 coco_targets.append(coco_target)
                 ann_id += 1
         return coco_targets
 
     def validation_step(self, batch,batch_idx):
-        #pass
         images, targets = batch
     
         # Run the model on the images and targets
@@ -297,12 +303,12 @@ class InstanceSegmentationModel(pl.LightningModule):
         
         # Create a COCO object for the ground truth
         coco_gt = COCO()
-        coco_gt.dataset = {"images": [{"id": idx} for idx in range(len(targets))], "annotations": targets,"categories": self.categories}
+        coco_gt.dataset = {"images": [{"id": idx, "height": targets[idx]["height"], "width": targets[idx]["width"]} for idx in range(len(targets))], "annotations": targets,"categories": self.categories}
         coco_gt.createIndex()
 
         # Create a COCO object for the predictions
         coco_preds = COCO()
-        coco_preds.dataset = {"images": [{"id": idx} for idx in range(len(preds))], "annotations": preds, "categories": self.categories}
+        coco_preds.dataset = {"images": [{"id": idx, "height": preds[idx]["height"], "width": preds[idx]["width"]} for idx in range(len(preds))], "annotations": preds, "categories": self.categories}
         coco_preds.createIndex()
 
         # Calculate box mAP
