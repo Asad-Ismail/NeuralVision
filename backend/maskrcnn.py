@@ -241,6 +241,7 @@ class InstanceSegmentationModel(pl.LightningModule):
                     "width": w
                 }
                 coco_preds.append(coco_pred)
+                ann_id += 1
         return coco_preds
     
     def convert_targets_to_coco_format(self, targets):
@@ -420,4 +421,4 @@ def main(perform_inference=False):
                     break
 
 if __name__ == "__main__":
-    main(perform_inference=True)
+    main(perform_inference=False)
