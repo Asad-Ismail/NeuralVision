@@ -177,7 +177,8 @@ class InstanceSegmentationModel(pl.LightningModule):
         self.all_targets = []
         # For coco evaluation
         self.img_idx = 0
-        self.ann_id = 0
+        self.categories = [{"id": 1, "name": "Ballon"}]
+
 
     def forward(self, x, targets=None):
         if self.training and targets is not None:
@@ -218,9 +219,9 @@ class InstanceSegmentationModel(pl.LightningModule):
                 x1, y1, x2, y2 = box.tolist()
                 w, h = x2 - x1, y2 - y1
                 bbox = [x1, y1, w, h]
-
+                mask[mask>0.5]=1
                 rle_mask = rle_mask = cocomask.encode(np.asfortranarray(mask.numpy().astype(np.uint8)))
-
+                area = float(mask.sum().item())
                 coco_pred = {
                     "id": ann_id,
                     "image_id": img_id,
@@ -228,6 +229,7 @@ class InstanceSegmentationModel(pl.LightningModule):
                     "bbox": bbox,
                     "score": score.item(),
                     "segmentation": rle_mask,
+                    "area": area
                 }
                 coco_preds.append(coco_pred)
         return coco_preds
@@ -292,14 +294,15 @@ class InstanceSegmentationModel(pl.LightningModule):
         self.log("val_mask_mAP", mask_ap, prog_bar=True, logger=True)
     
     def evaluate_predictions(self, preds, targets):
+        
         # Create a COCO object for the ground truth
         coco_gt = COCO()
-        coco_gt.dataset = {"images": [{"id": idx} for idx in range(len(targets))], "annotations": targets}
+        coco_gt.dataset = {"images": [{"id": idx} for idx in range(len(targets))], "annotations": targets,"categories": self.categories}
         coco_gt.createIndex()
 
         # Create a COCO object for the predictions
         coco_preds = COCO()
-        coco_preds.dataset = {"images": [{"id": idx} for idx in range(len(preds))], "annotations": preds}
+        coco_preds.dataset = {"images": [{"id": idx} for idx in range(len(preds))], "annotations": preds, "categories": self.categories}
         coco_preds.createIndex()
 
         # Calculate box mAP
