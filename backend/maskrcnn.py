@@ -23,6 +23,8 @@ from pycocotools.coco import COCO
 from pycocotools.cocoeval import COCOeval
 from pycocotools import mask as cocomask
 from pytorch_lightning.callbacks import ModelCheckpoint
+from torchvision.transforms.functional import to_pil_image
+import matplotlib.pyplot as plt
 
 
 logging.basicConfig(level=logging.INFO)
@@ -121,12 +123,6 @@ class COCODataModule(pl.LightningDataModule):
     def custom_collate_fn(self, batch):
         images = [item[0] for item in batch]
         targets = [item[1] for item in batch]
-        #print(f"The images length are {len(images)}")
-        #print(f"The targets length are {len(targets)}")
-        #print(f"Image shape is {images[0].shape}")
-        #print(f"Image min and max are  {images[0].min(),images[0].max()}")
-        #print(f"Target keys are {targets[0].keys()}") 
-        #print(f"Target masks min and max are  {targets[0]['masks'].min(),targets[0]['masks'].max()}") 
         return images, targets
 
     def train_dataloader(self):
@@ -144,19 +140,28 @@ class CustomTimmModel(torch.nn.Module):
 
     def forward(self, x):
         # Call the forward() method of the timm model
+        # using just last feature map as input not building FPN can change in future
         feature_maps = self.backbone(x)
-        
         return feature_maps[-1]
+    
+    def freeze(self):
+        for param in self.backbone.parameters():
+            param.requires_grad = False
+            
+    def unfreeze(self):
+        for param in self.backbone.parameters():
+            param.requires_grad = True
 
 def get_instance_segmentation_model(backbone_name,num_classes):
     # Load the backbone from timm
     backbone = CustomTimmModel(backbone_name, pretrained=True, features_only=True)
+    # Freeze the backbone
+    backbone.freeze()
 
     anchor_generator = AnchorGenerator(sizes=((32, 64, 128, 256, 512),),aspect_ratios=((0.5, 1.0, 2.0),))
 
     roi_pooler = torchvision.ops.MultiScaleRoIAlign(featmap_names=['0'],output_size=7,sampling_ratio=2)
     mask_roi_pooler = torchvision.ops.MultiScaleRoIAlign(featmap_names=['0'],output_size=14,sampling_ratio=2)
-
 
     # put the pieces together inside a MaskRCNN model
     model = MaskRCNN(backbone,
@@ -189,7 +194,6 @@ class InstanceSegmentationModel(pl.LightningModule):
 
     def training_step(self, batch,batch_idx):
         images, targets = batch
-
         # Set the target's device to be the same as the model's device
         targets = [{k: v.to(self.device) for k, v in t.items()} for t in targets]
 
@@ -223,7 +227,7 @@ class InstanceSegmentationModel(pl.LightningModule):
                 mask[mask>0.5]=1
                 mask=mask.squeeze(0)
                 h,w=mask.shape
-                rle_mask = rle_mask = cocomask.encode(np.asfortranarray(mask.numpy().astype(np.uint8)))
+                rle_mask = cocomask.encode(np.asfortranarray(mask.numpy().astype(np.uint8)))
                 area = float(mask.sum().item())
                 coco_pred = {
                     "id": ann_id,
@@ -270,8 +274,9 @@ class InstanceSegmentationModel(pl.LightningModule):
         images, targets = batch
     
         # Run the model on the images and targets
-        preds = self.model(images, targets)
-        
+        with torch.no_grad():
+            preds = self.model(images, targets)
+            
         # Convert everything to CPU
         images=[img.detach().cpu() for img in images]
         targets = [{k: v.to("cpu") for k, v in t.items()} for t in targets]
@@ -308,7 +313,8 @@ class InstanceSegmentationModel(pl.LightningModule):
 
         # Create a COCO object for the predictions
         coco_preds = COCO()
-        coco_preds.dataset = {"images": [{"id": idx, "height": preds[idx]["height"], "width": preds[idx]["width"]} for idx in range(len(preds))], "annotations": preds, "categories": self.categories}
+        #coco_preds.dataset = {"images": [{"id": idx, "height": preds[idx]["height"], "width": preds[idx]["width"]} for idx in range(len(preds))], "annotations": preds, "categories": self.categories}
+        coco_preds.dataset = {"images": [{"id": idx, "height": targets[idx]["height"], "width": targets[idx]["width"]} for idx in range(len(targets))], "annotations": preds, "categories": self.categories}
         coco_preds.createIndex()
 
         # Calculate box mAP
@@ -331,46 +337,87 @@ class InstanceSegmentationModel(pl.LightningModule):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
         return optimizer
 
-if __name__=="__main__":
+
+def visualize_predictions(image,preds,score_threshold=0.5):
+    img = to_pil_image(image.cpu())
+    boxes = preds['boxes'].cpu().numpy()
+    labels = preds['labels'].cpu().numpy()
+    masks = preds['masks'].cpu().numpy()
+    scores = preds['scores'].cpu().numpy()
+
+    # Convert PIL image to OpenCV format
+    img_cv = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
+
+    # Draw bounding boxes and class labels
+    for box, label, mask,score in zip(boxes, labels, masks,scores):
+        if score < score_threshold:
+            continue
+        x1, y1, x2, y2 = box.astype(np.int32)
+        cv2.rectangle(img_cv, (x1, y1), (x2, y2), (0, 255, 0), 2)
+        cv2.putText(img_cv, str(label), (x1, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+        # Create a mask overlay
+        mask_overlay = np.zeros_like(img_cv, dtype=np.uint8)
+        mask[mask>0.5]=1
+        mask_overlay[:, :, 1] = mask * 255
+        # Combine the original image and the mask overlay
+        alpha = 0.5
+        img_cv = cv2.addWeighted(img_cv, 1, mask_overlay, alpha, 0)
+    # Display the image
+    plt.imshow(cv2.cvtColor(img_cv, cv2.COLOR_BGR2RGB))
+    plt.axis('off')
+    plt.show()
+
+
+def main(perform_inference=False):
     # Set the number of classes, backbone, and dimension
     num_classes = 2  # 1 class (person) + 1 background class
     backbone_name = "resnet18"  # You can use any other backbone supported by timm
 
-    lightning_module = InstanceSegmentationModel(backbone_name,num_classes)
-    
-    #lightning_module.eval()
-    #x = [torch.rand(3, 300, 400)]
-    #predictions = lightning_module(x)
-    #print(predictions[0]["masks"].shape)
-    #exit()
-
+    lightning_module = InstanceSegmentationModel(backbone_name, num_classes)
     # Set the path to the COCO dataset
     coco_data_dir = "/home/asad/Downloads/Balloons.v15i.coco-segmentation/"
 
     # Initialize the data module
     data_module = COCODataModule(coco_data_dir)
-
-    
     # Create a ModelCheckpoint callback to save the best model and the last model weights
     checkpoint_callback = ModelCheckpoint(
-        dirpath="model_checkpoints",
-        filename="best_model_and_last_weights-{epoch:02d}-{val_loss:.2f}",
-        save_top_k=1,
-        verbose=True,
-        monitor="train_loss",
-        mode="min",
-        save_last=True,
-    )
-    
-    # Initialize the trainer    
+            dirpath="model_checkpoints",
+            filename="best_model_and_last_weights-{epoch:02d}-{train_loss:.2f}",
+            save_top_k=1,
+            verbose=True,
+            monitor="train_loss",
+            mode="min",
+            save_last=True,
+        )
+    # Initialize the trainer
     trainer = Trainer(accelerator="gpu", max_epochs=30, callbacks=[checkpoint_callback])
 
-    # Start the training
-    trainer.fit(lightning_module, data_module)
+    if not perform_inference:
+        # Start the training
+        trainer.fit(lightning_module, data_module)
+    else:
+        # Initialize data module
+        data_module.setup()
+        # Load the best model weights
+        lightning_module.load_state_dict(torch.load("model_checkpoints/last.ckpt")["state_dict"])
+        lightning_module.eval()  # Set the model to evaluation mode
+        with torch.no_grad():  # Disable gradient calculation for the model
+            for i,data in enumerate(data_module.val_dataloader()):
+                if i<1:
+                    continue
+                # Get the first batch of data
+                images, targets = data
+                # Perform inference on the validation dataset
+                preds = lightning_module(images)
+                # Extract single image and targets from the batch
+                image=images[0]
+                pred=preds[0]
+                #print(image.shape)
+                # Visualize the results
+                visualize_predictions(image,pred)  # Assuming you have a function named visualize_predictions
+                # Break from the loop if you have enough data to visualize the results. Otherwise, keep going.
+                if len(preds) > 0:
+                    break
 
-
-    # Assuming the lightning_module is an instance of InstanceSegmentationModel
-    #lightning_module.eval()  # Set the model to evaluation mode
-    #with torch.no_grad():
-    #    images = ...  # Load your images as a batch of tensors
-    #    predictions = lightning_module(images)
+if __name__ == "__main__":
+    main(perform_inference=False)
