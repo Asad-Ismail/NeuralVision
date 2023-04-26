@@ -307,7 +307,7 @@ class InstanceSegmentationModel(pl.LightningModule):
 
         # Create a COCO object for the predictions
         coco_preds = COCO()
-        coco_preds.dataset = {"images": [{"id": idx, "height": preds[idx]["height"], "width": preds[idx]["width"]} for idx in range(len(preds))], "annotations": preds, "categories": self.categories}
+        coco_preds.dataset = {"images": [{"id": idx} for idx in range(len(preds))], "annotations": preds, "categories": self.categories}
         coco_preds.createIndex()
 
         # Calculate box mAP
