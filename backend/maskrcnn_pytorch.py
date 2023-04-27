@@ -389,7 +389,7 @@ def main(perform_inference=False):
     num_classes = 2  # 1 class (balloon) + 1 background class
     backbone_name = "resnet101"  # You can use any other backbone supported by timm
 
-    lightning_module = InstanceSegmentationModel(backbone_name, num_classes,learning_rate=1e-3)
+    lightning_module = InstanceSegmentationModel(num_classes,backbone_name,learning_rate=1e-3)
     # Set the path to the COCO dataset
     coco_data_dir = "/home/asad/Downloads/Balloons.v15i.coco-segmentation/"
 
@@ -406,7 +406,7 @@ def main(perform_inference=False):
             save_last=True,
         )
     # Initialize the trainer
-    trainer = Trainer(accelerator="gpu", max_epochs=100, callbacks=[checkpoint_callback])
+    trainer = Trainer(accelerator="gpu", max_epochs=30, callbacks=[checkpoint_callback])
 
     if not perform_inference:
         # Start the training

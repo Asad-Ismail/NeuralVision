@@ -169,7 +169,7 @@ def get_instance_segmentation_model(backbone_name,num_classes):
 
     # put the pieces together inside a MaskRCNN model
     model = MaskRCNN(backbone,
-     num_classes=2,
+     num_classes=num_classes,
      rpn_anchor_generator=anchor_generator,
      box_roi_pool=roi_pooler,
      mask_roi_pool=mask_roi_pooler)
@@ -178,11 +178,11 @@ def get_instance_segmentation_model(backbone_name,num_classes):
 
 
 class InstanceSegmentationModel(pl.LightningModule):
-    def __init__(self, num_classes, backbone_name, learning_rate=0.001):
+    def __init__(self, backbone_name, num_classes, learning_rate=0.001):
         super().__init__()
 
         self.learning_rate = learning_rate
-        self.model = get_instance_segmentation_model(num_classes, backbone_name)
+        self.model = get_instance_segmentation_model(backbone_name,num_classes)
         self.all_preds = []
         self.all_targets = []
         # For coco evaluation
