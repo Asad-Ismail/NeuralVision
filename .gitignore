@@ -3,3 +3,5 @@
 *.ckpt
 *events*
 *.pyc
+*/lightning_logs/*
+*.vscode/*

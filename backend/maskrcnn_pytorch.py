@@ -27,6 +27,9 @@ from torchvision.transforms.functional import to_pil_image
 import matplotlib.pyplot as plt
 from torch.optim.lr_scheduler import OneCycleLR
 from torch.optim import Adam
+import torchvision
+from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
+from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor
 
 
 
@@ -155,34 +158,31 @@ class CustomTimmModel(torch.nn.Module):
         for param in self.backbone.parameters():
             param.requires_grad = True
 
-def get_instance_segmentation_model(backbone_name,num_classes):
-    # Load the backbone from timm
-    backbone = CustomTimmModel(backbone_name, pretrained=True, features_only=True)
-    # Freeze the backbone
-    #backbone.freeze()
-    backbone.unfreeze()
+def get_model_instance_segmentation(num_classes):
+    # load an instance segmentation model pre-trained on COCO
+    model = torchvision.models.detection.maskrcnn_resnet50_fpn(weights="DEFAULT")
 
-    anchor_generator = AnchorGenerator(sizes=((32, 64, 128, 256, 512),),aspect_ratios=((0.5, 1.0, 2.0),))
+    # get number of input features for the classifier
+    in_features = model.roi_heads.box_predictor.cls_score.in_features
+    # replace the pre-trained head with a new one
+    model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes)
 
-    roi_pooler = torchvision.ops.MultiScaleRoIAlign(featmap_names=['0'],output_size=7,sampling_ratio=2)
-    mask_roi_pooler = torchvision.ops.MultiScaleRoIAlign(featmap_names=['0'],output_size=14,sampling_ratio=2)
-
-    # put the pieces together inside a MaskRCNN model
-    model = MaskRCNN(backbone,
-     num_classes=2,
-     rpn_anchor_generator=anchor_generator,
-     box_roi_pool=roi_pooler,
-     mask_roi_pool=mask_roi_pooler)
+    # now get the number of input features for the mask classifier
+    in_features_mask = model.roi_heads.mask_predictor.conv5_mask.in_channels
+    hidden_layer = 256
+    # and replace the mask predictor with a new one
+    model.roi_heads.mask_predictor = MaskRCNNPredictor(in_features_mask,
+                                                       hidden_layer,
+                                                       num_classes)
 
     return model
-
 
 class InstanceSegmentationModel(pl.LightningModule):
     def __init__(self, num_classes, backbone_name, learning_rate=0.001):
         super().__init__()
 
         self.learning_rate = learning_rate
-        self.model = get_instance_segmentation_model(num_classes, backbone_name)
+        self.model = get_model_instance_segmentation(num_classes)
         self.all_preds = []
         self.all_targets = []
         # For coco evaluation
@@ -415,21 +415,13 @@ def main(perform_inference=False):
         lightning_module.eval()  # Set the model to evaluation mode
         with torch.no_grad():  # Disable gradient calculation for the model
             for i,data in enumerate(data_module.val_dataloader()):
-                #if i<3:
-                #    continue
-                # Get the first batch of data
                 images, targets = data
                 # Perform inference on the validation dataset
                 preds = lightning_module(images)
                 # Extract single image and targets from the batch
                 image=images[0]
                 pred=preds[0]
-                #print(image.shape)
-                # Visualize the results
                 visualize_predictions(image,pred)  # Assuming you have a function named visualize_predictions
-                # Break from the loop if you have enough data to visualize the results. Otherwise, keep going.
-                #if len(preds) > 0:
-                #    break
-
+                
 if __name__ == "__main__":
     main(perform_inference=False)
