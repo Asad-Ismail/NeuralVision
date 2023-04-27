@@ -1,7 +1,7 @@
 # PixelVisionX
 
 <p align="center">
-  <img src="vis_imgs/logo.jpeg" alt="pixelVision">
+  <img src="vis_imgs/logo.jpeg" alt="pixelVision" img width="150" img height="100">
 </p>
 
 
