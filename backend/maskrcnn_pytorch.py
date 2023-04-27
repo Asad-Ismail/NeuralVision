@@ -211,6 +211,10 @@ class InstanceSegmentationModel(pl.LightningModule):
         self.log("train_loss", total_loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
         for key, value in loss_dict.items():
             self.log(f"train_{key}", value, on_step=True, on_epoch=True, prog_bar=True, logger=True)
+            
+        # Log the current learning rate
+        current_lr = self.optimizers().param_groups[0]['lr']
+        self.log("train_learning_rate", current_lr, on_step=True, on_epoch=True, prog_bar=True, logger=True)
 
         return total_loss
 

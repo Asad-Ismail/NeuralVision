@@ -99,4 +99,11 @@ body {
     color: #fff;
     margin-top: 1rem;
   }
+
+  .logo {
+    width: 250px; /* Adjust the width as needed */
+    height: auto; /* Maintain the aspect ratio */
+    margin-bottom: 16px; /* Add some margin below the logo */
+  }
+  
   

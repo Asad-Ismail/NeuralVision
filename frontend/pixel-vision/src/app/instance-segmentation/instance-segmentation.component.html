@@ -13,48 +13,25 @@
           <!-- Step 1: Select Training Dataset -->
           <div class="step-container">
             <h3>Step 1: Select Training Dataset</h3>
-            <input type="file" id="imageInput" (change)="onFileSelect($event)" multiple accept="image/*">
-  
-            <!-- Image Preview -->
-            <div class="image-preview-container">
-              <img *ngFor="let imageSrc of imagePreviews" [src]="imageSrc" class="image-thumbnail">
+            <div class="input-container">
+              <label for="imagePath">Image Directory Path</label>
+              <input [ngModel]="dataPath" (ngModelChange)="onDataPathChange($event)" id="dataPath" type="text" placeholder="Enter image directory path">
             </div>
-  
-            <!-- Image Count -->
-            <div *ngIf="imagePreviews.length > 0" class="image-count">
-              Total images: {{ imagePreviews.length }}
-            </div>
+            <!-- Add this div after the input for the data path -->
+          <div class="info-container" *ngIf="trainImagesCount !== null && trainlabelsCount !== null">
+            <p>Number of train images: {{ trainImagesCount }}</p>
+            <p>Number of train labels: {{ trainlabelsCount }}</p>
+            <p>Number of val images: {{ valImagesCount }}</p>
+            <p>Number of val labels: {{ vallabelsCount }}</p>
+          </div>
 
-            <!-- Label Files -->
-            <div class="label-files-container">
-                <h4>Label Files</h4>
-                <input type="file" id="labelInput" (change)="onLabelFileSelect($event)" multiple accept=".json">
-            </div>
-            
-            <!-- Label Files Count -->
-            <div *ngIf="labelFileNames.length > 0" class="label-files-count">
-                Total labels: {{ labelFileNames.length }}
-            </div>
-          </div>
-  
-          <!-- Upload Button -->
-          <div class="button-container">
-            <button (click)="uploadImagesInChunks()" class="btn-excite">Upload Data</button>
-          </div>
-  
-          <!-- Upload Progress Bar -->
-          <div *ngIf="uploadInProgress" class="upload-progress-bar-container">
-            <div class="upload-progress-bar" [style.width.%]="uploadProgress"></div>
-            <div class="upload-progress-text">{{ uploadProgress }}%</div>
-          </div>
-  
           <!-- Reset Button -->
           <div class="reset-button-container">
             <button type="button" class="btn-reset" (click)="reset()">Reset</button>
           </div>
   
           <!-- Step 2: Configure Hyperparameters -->
-          <ng-container *ngIf="imagesUploaded">
+          <ng-container >
             <div class="step-container">
               <h3>Step 2: Configure Hyperparameters</h3>
             </div>
@@ -74,9 +51,7 @@
                 <label for="algorithmType">Algorithm Type</label>
                 <select formControlName="algorithmType" id="algorithmType" required>
                   <option value="">Select Algorithm</option>
-                  <option value="MOCO">MOCO</option>
-                  <option value="algorithm2">Algorithm 2</option>
-                  <option value="algorithm3">Algorithm 3</option>
+                  <option value="MaskRCNN">MOCO</option>
                 </select>
                 <!-- Add more form controls if needed -->
               </div>

@@ -7,6 +7,7 @@ import { NewProjectComponent } from './new-project/new-project.component';
 import { HttpClientModule } from '@angular/common/http';
 import { NgChartsModule } from 'ng2-charts';
 import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { NewProjectFormComponent } from './new-project/new-project-form/new-project-form.component';
 import { TaskSelectionComponent } from './task-selection/task-selection.component';
 import { InstanceSegmentationComponent } from './instance-segmentation/instance-segmentation.component';
@@ -34,6 +35,7 @@ const routes: Routes = [
     HttpClientModule,
     NgChartsModule,
     ReactiveFormsModule,
+    FormsModule, 
     RouterModule.forRoot(routes)
   ],
   providers: [],

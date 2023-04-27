@@ -211,6 +211,10 @@ class InstanceSegmentationModel(pl.LightningModule):
         self.log("train_loss", total_loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
         for key, value in loss_dict.items():
             self.log(f"train_{key}", value, on_step=True, on_epoch=True, prog_bar=True, logger=True)
+            
+        # Log the current learning rate
+        current_lr = self.optimizers().param_groups[0]['lr']
+        self.log("train_learning_rate", current_lr, on_step=True, on_epoch=True, prog_bar=True, logger=True)
 
         return total_loss
 
@@ -415,21 +419,16 @@ def main(perform_inference=False):
         lightning_module.eval()  # Set the model to evaluation mode
         with torch.no_grad():  # Disable gradient calculation for the model
             for i,data in enumerate(data_module.val_dataloader()):
-                #if i<3:
-                #    continue
-                # Get the first batch of data
                 images, targets = data
                 # Perform inference on the validation dataset
                 preds = lightning_module(images)
                 # Extract single image and targets from the batch
                 image=images[0]
                 pred=preds[0]
-                #print(image.shape)
-                # Visualize the results
                 visualize_predictions(image,pred)  # Assuming you have a function named visualize_predictions
                 # Break from the loop if you have enough data to visualize the results. Otherwise, keep going.
                 #if len(preds) > 0:
                 #    break
 
 if __name__ == "__main__":
-    main(perform_inference=False)
+    main(perform_inference=True)

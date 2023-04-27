@@ -5,6 +5,7 @@ import { FormGroup, FormControl, Validators } from '@angular/forms';
 import io from 'socket.io-client';
 import { Router } from '@angular/router';
 
+
 @Component({
   selector: 'app-instance-segmentation',
   templateUrl: './instance-segmentation.component.html',
@@ -22,84 +23,39 @@ export class InstanceSegmentationComponent implements OnInit, OnDestroy{
   // Add a new property to check if hyperparameters have been submitted
   hyperparametersSubmitted: boolean = false;
   private socket: any;
+  dataPath: string = '';
+  trainImagesCount: number | null = null;
+  trainlabelsCount: number | null = null;
+  valImagesCount: number | null = null;
+  vallabelsCount: number | null = null;
 
-  imagePreviews: string[] = [];
-  imagesUploaded = false;
-  labelFileNames: string[] = [];
-  labelsUploaded = false;
 
-  onFileSelect(event: any) {
-    this.imagePreviews = [];
-    const files = event.target.files;
+  onDataPathChange(value: string) {
+    this.dataPath = value;
+  }
+  
 
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      const reader = new FileReader();
-
-      reader.onload = (e: any) => {
-        this.imagePreviews.push(e.target.result);
+  async sendDataToBackend() {
+    if (this.dataPath) {
+      const requestData = {
+        dataPath: this.dataPath,
       };
-
-      reader.readAsDataURL(file);
-    }
-  }
-
-  onLabelFileSelect(event: any) {
-    this.labelFileNames = [];
-    const files = event.target.files;
   
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      this.labelFileNames.push(file.name);
-    }
-  }
-  
-
-  async uploadImagesInChunks() {
-    this.uploadInProgress = true;
-    this.uploadProgress = 0;
-    const chunkSize = 10; // Number of images to upload in each chunk
-    const imageInput = document.getElementById('imageInput') as HTMLInputElement;
-    const labelInput = document.getElementById('labelInput') as HTMLInputElement;
-  
-    if (imageInput.files && labelInput.files) {
-      const imageFiles = Array.from(imageInput.files);
-      const labelFiles = Array.from(labelInput.files);
-  
-      if (imageFiles.length !== labelFiles.length) {
-        console.error('The number of image files and label files should be the same');
-        this.uploadInProgress = false;
-        return;
+      try {
+        const response: any = await this.http.post('http://localhost:5000/api/instance_segmentation_uploaddata', requestData).toPromise();
+        console.log(response);
+        // Get the number of train images and labels from the response
+        const trainImagesCount = response.trainImagesCount;
+        const labelsCount = response.labelsCount;
+        const valImagesCount = response.valImagesCount;
+        const vallabelsCount = response.vallabelsCount;
+        // Display the counts on the front end or use them as needed
+      } catch (error) {
+        console.error('Sending data to backend failed', error);
+        // Handle the failure (retry or inform the user)
       }
-  
-      for (let i = 0; i < imageFiles.length; i += chunkSize) {
-        const formData = new FormData();
-        const imageChunk = imageFiles.slice(i, i + chunkSize);
-        const labelChunk = labelFiles.slice(i, i + chunkSize);
-  
-        for (const file of imageChunk) {
-          formData.append('images', file);
-        }
-  
-        for (const file of labelChunk) {
-          formData.append('labels', file);
-        }
-  
-        try {
-          const response = await this.http.post('http://localhost:5000/api/uploaddata', formData).toPromise();
-          console.log(response);
-        } catch (error) {
-          console.error('Upload failed for chunk', error);
-          // Handle the upload failure (retry or inform the user)
-        }
-      }
-      this.imagesUploaded = true;
-      this.labelsUploaded = true;
-      // When the upload is completed
-      this.uploadInProgress = false;
     }
   }
-  
   
   reset() {
     this.logs = '';
