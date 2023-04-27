@@ -25,6 +25,9 @@ from pycocotools import mask as cocomask
 from pytorch_lightning.callbacks import ModelCheckpoint
 from torchvision.transforms.functional import to_pil_image
 import matplotlib.pyplot as plt
+from torch.optim.lr_scheduler import OneCycleLR
+from torch.optim import Adam
+
 
 
 logging.basicConfig(level=logging.INFO)
@@ -129,7 +132,7 @@ class COCODataModule(pl.LightningDataModule):
         return DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers,collate_fn=self.custom_collate_fn)
 
     def val_dataloader(self):
-        return DataLoader(self.val_dataset, batch_size=self.batch_size, shuffle=False, num_workers=self.num_workers,collate_fn=self.custom_collate_fn)
+        return DataLoader(self.val_dataset, batch_size=1, shuffle=False, num_workers=self.num_workers,collate_fn=self.custom_collate_fn)
 
 # To return dict of features instead of list
 class CustomTimmModel(torch.nn.Module):
@@ -157,6 +160,7 @@ def get_instance_segmentation_model(backbone_name,num_classes):
     backbone = CustomTimmModel(backbone_name, pretrained=True, features_only=True)
     # Freeze the backbone
     #backbone.freeze()
+    backbone.unfreeze()
 
     anchor_generator = AnchorGenerator(sizes=((32, 64, 128, 256, 512),),aspect_ratios=((0.5, 1.0, 2.0),))
 
@@ -335,8 +339,15 @@ class InstanceSegmentationModel(pl.LightningModule):
         return box_ap, mask_ap
     
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
-        return optimizer
+        optimizer = Adam(self.parameters(), lr=self.learning_rate)
+        steps_per_epoch = len(self.train_dataloader())
+        max_epochs = self.trainer.max_epochs
+        scheduler = {
+            'scheduler': OneCycleLR(optimizer, max_lr=self.learning_rate, total_steps=steps_per_epoch * max_epochs),
+            'interval': 'step',
+            'frequency': 1,
+        }
+        return [optimizer], [scheduler]
 
 
 def visualize_predictions(image,preds,score_threshold=0.5):
@@ -372,9 +383,9 @@ def visualize_predictions(image,preds,score_threshold=0.5):
 def main(perform_inference=False):
     # Set the number of classes, backbone, and dimension
     num_classes = 2  # 1 class (balloon) + 1 background class
-    backbone_name = "resnet50"  # You can use any other backbone supported by timm
+    backbone_name = "resnet101"  # You can use any other backbone supported by timm
 
-    lightning_module = InstanceSegmentationModel(backbone_name, num_classes,learning_rate=1e-4)
+    lightning_module = InstanceSegmentationModel(backbone_name, num_classes,learning_rate=1e-3)
     # Set the path to the COCO dataset
     coco_data_dir = "/home/asad/Downloads/Balloons.v15i.coco-segmentation/"
 
@@ -404,8 +415,8 @@ def main(perform_inference=False):
         lightning_module.eval()  # Set the model to evaluation mode
         with torch.no_grad():  # Disable gradient calculation for the model
             for i,data in enumerate(data_module.val_dataloader()):
-                if i<2:
-                    continue
+                #if i<3:
+                #    continue
                 # Get the first batch of data
                 images, targets = data
                 # Perform inference on the validation dataset
@@ -417,8 +428,8 @@ def main(perform_inference=False):
                 # Visualize the results
                 visualize_predictions(image,pred)  # Assuming you have a function named visualize_predictions
                 # Break from the loop if you have enough data to visualize the results. Otherwise, keep going.
-                if len(preds) > 0:
-                    break
+                #if len(preds) > 0:
+                #    break
 
 if __name__ == "__main__":
-    main(perform_inference=False)
+    main(perform_inference=True)
