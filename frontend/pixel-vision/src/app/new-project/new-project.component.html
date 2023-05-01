@@ -13,28 +13,14 @@
         <!-- Step 1: Select Training Dataset -->
         <div class="step-container">
           <h3>Step 1: Select Training Dataset</h3>
-          <input type="file" id="imageInput" (change)="onFileSelect($event)" multiple accept="image/*">
 
-          <!-- Image Preview -->
-          <div class="image-preview-container">
-            <img *ngFor="let imageSrc of imagePreviews" [src]="imageSrc" class="image-thumbnail">
+          <div class="input-container">
+            <label for="imagePath">Image Directory Path</label>
+            <input [ngModel]="dataPath" (ngModelChange)="onDataPathChange($event)" id="dataPath" type="text" placeholder="Enter image directory path">
           </div>
-
-          <!-- Image Count -->
-          <div *ngIf="imagePreviews.length > 0" class="image-count">
-            Total images: {{ imagePreviews.length }}
-          </div>
-        </div>
-
-        <!-- Upload Button -->
-        <div class="button-container">
-          <button (click)="uploadImagesInChunks()" class="btn-excite">Upload Images</button>
-        </div>
-
-        <!-- Upload Progress Bar -->
-        <div *ngIf="uploadInProgress" class="upload-progress-bar-container">
-          <div class="upload-progress-bar" [style.width.%]="uploadProgress"></div>
-          <div class="upload-progress-text">{{ uploadProgress }}%</div>
+          <!-- Add this div after the input for the data path -->
+        <div class="info-container" *ngIf="trainImagesCount !== null">
+          <p>Number of train images: {{ trainImagesCount }}</p>
         </div>
 
         <!-- Reset Button -->

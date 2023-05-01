@@ -118,8 +118,33 @@ export class NewProjectComponent implements OnInit, OnDestroy
   uploadInProgress = false;
   uploadProgress = 0;
   showSteps = false;
+  dataPath: string = '';
+  trainImagesCount: number | null = null;
 
+
+  onDataPathChange(value: string) {
+    this.dataPath = value;
+  }
   
+
+  async sendDataToBackend() {
+    if (this.dataPath) {
+      const requestData = {
+        dataPath: this.dataPath,
+      };
+  
+      try {
+        const response: any = await this.http.post('http://localhost:5000/api/ssl_uploaddata', requestData).toPromise();
+        console.log(response);
+        // Get the number of train images and labels from the response
+        const trainImagesCount = response.trainImagesCount;
+        // Display the counts on the front end or use them as needed
+      } catch (error) {
+        console.error('Sending data to backend failed', error);
+        // Handle the failure (retry or inform the user)
+      }
+    }
+  }
 
   constructor(private http: HttpClient, private ngZone: NgZone,private router: Router) 
   

@@ -111,7 +111,7 @@ class CustomDataset(Dataset):
 
 
 class COCODataModule(pl.LightningDataModule):
-    def __init__(self, data_dir, batch_size=1, num_workers=4):
+    def __init__(self, data_dir, batch_size=1, num_workers=1):
         super().__init__()
         self.data_dir = data_dir
         self.batch_size = batch_size
@@ -214,7 +214,7 @@ class InstanceSegmentationModel(pl.LightningModule):
             
         # Log the current learning rate
         current_lr = self.optimizers().param_groups[0]['lr']
-        self.log("train_learning_rate", current_lr, on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        self.log("Current Learning Rate", current_lr, on_step=True, on_epoch=True, prog_bar=True, logger=True)
 
         return total_loss
 
@@ -415,7 +415,7 @@ def main(perform_inference=False):
         # Initialize data module
         data_module.setup()
         # Load the best model weights
-        lightning_module.load_state_dict(torch.load("model_checkpoints/last.ckpt")["state_dict"])
+        lightning_module.load_state_dict(torch.load("/home/asad/dev/PixelVisionX/backend/model_checkpoints/last.ckpt")["state_dict"])
         lightning_module.eval()  # Set the model to evaluation mode
         with torch.no_grad():  # Disable gradient calculation for the model
             for i,data in enumerate(data_module.val_dataloader()):
@@ -428,4 +428,4 @@ def main(perform_inference=False):
                 visualize_predictions(image,pred)  # Assuming you have a function named visualize_predictions
                 
 if __name__ == "__main__":
-    main(perform_inference=False)
+    main(perform_inference=True)
