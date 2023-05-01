@@ -15,21 +15,22 @@
           <h3>Step 1: Select Training Dataset</h3>
 
           <div class="input-container">
-            <label for="imagePath">Image Directory Path</label>
-            <input [ngModel]="dataPath" (ngModelChange)="onDataPathChange($event)" id="dataPath" type="text" placeholder="Enter image directory path">
+            <label for="imagePath">Images Path</label>
+            <input [ngModel]="dataPath" (ngModelChange)="onDataPathChange($event)" id="dataPath" type="text" placeholder="Images path: ">
+          </div>
+
+          <!-- Add this button after the input for the data path -->
+          <div class="button-container">
+            <button type="button" class="btn-excite" (click)="submitDataPath()">Submit Path</button>
           </div>
           <!-- Add this div after the input for the data path -->
-        <div class="info-container" *ngIf="trainImagesCount !== null">
-          <p>Number of train images: {{ trainImagesCount }}</p>
-        </div>
-
-        <!-- Reset Button -->
-        <div class="reset-button-container">
-          <button type="button" class="btn-reset" (click)="reset()">Reset</button>
+          <div class="info-container" *ngIf="trainImagesCount !== null">
+            <p>Number of train images: {{ trainImagesCount }}</p>
+          </div>
         </div>
 
         <!-- Step 2: Configure Hyperparameters -->
-        <ng-container *ngIf="imagesUploaded">
+        <ng-container *ngIf="trainImagesCount">
           <div class="step-container">
             <h3>Step 2: Configure Hyperparameters</h3>
           </div>
@@ -50,14 +51,11 @@
               <select formControlName="algorithmType" id="algorithmType" required>
                 <option value="">Select Algorithm</option>
                 <option value="MOCO">MOCO</option>
-                <option value="algorithm2">Algorithm 2</option>
-                <option value="algorithm3">Algorithm 3</option>
               </select>
-              <!-- Add more form controls if needed -->
             </div>
             <!-- Submit Button -->
             <div class="button-container">
-              <button type="submit" class="btn-excite">Submit HParameters</button>
+              <button type="submit" class="btn-excite">Submit Hyperparameters</button>
             </div>
           </form>
 
@@ -66,6 +64,7 @@
             <button type="button" class="btn-reset" (click)="reset()">Reset</button>
           </div>
         </ng-container>
+
 
         <!-- Step 3: Start Training -->
         <div class="training-section" *ngIf="hyperparametersSubmitted">

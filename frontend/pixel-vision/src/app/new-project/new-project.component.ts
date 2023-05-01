@@ -27,21 +27,10 @@ export class NewProjectComponent implements OnInit, OnDestroy
   imagePreviews: string[] = [];
   imagesUploaded = false;
 
-  onFileSelect(event: any) {
-    this.imagePreviews = [];
-    const files = event.target.files;
-
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      const reader = new FileReader();
-
-      reader.onload = (e: any) => {
-        this.imagePreviews.push(e.target.result);
-      };
-
-      reader.readAsDataURL(file);
-    }
+  async submitDataPath() {
+    await this.sendDataToBackend();
   }
+
   
   reset() {
     this.logs = '';

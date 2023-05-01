@@ -76,40 +76,27 @@ def new_project():
     logging.debug(project_name)
     return jsonify({'status': 'success'})
 
+def count_images_in_directory(directory):
+    image_extensions = ('.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff')
+    return sum(1 for file in os.listdir(directory) if file.lower().endswith(image_extensions))
 
-@app.route('/api/uploadimages', methods=['POST'])
-def upload_images():
-    if 'images' not in request.files:
-        return {'error': 'No images found'}, 400
+@app.route('/api/ssl_uploaddata', methods=['POST'])
+def ssl_upload():
+    data = request.get_json()
 
-    images = request.files.getlist('images')
+    if 'dataPath' not in data:
+        return jsonify({'error': 'dataPath is missing'}), 400
 
-    for image in images:
-        filename = image.filename
-        save_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        image.save(save_path)
+    data_path = data['dataPath']
+    
+    logging.debug(f"Received Data path: {data_path}")
 
-    return {'message': 'Images uploaded successfully'}, 200
+    if not os.path.isdir(data_path):
+        return jsonify({'error': 'Invalid dataPath'}), 400
 
-@app.route('/api/uploaddata', methods=['POST'])
-def upload():
-    if request.method == 'POST':
-        images = request.files.getlist('images')
-        labels = request.files.getlist('labels')
-
-        if len(images) != len(labels):
-            return jsonify({'error': 'The number of image files and label files should be the same'}), 400
-
-        for image, label in zip(images, labels):
-            image_filename = secure_filename(image.filename)
-            label_filename = secure_filename(label.filename)
-
-            image.save(os.path.join(app.config['UPLOAD_FOLDER'], image_filename))
-            label.save(os.path.join(app.config['UPLOAD_FOLDER'], label_filename))
-
-        return jsonify({'message': 'Files uploaded successfully'})
-    else:
-        return jsonify({'error': 'Invalid request method'}), 405
+    image_count = count_images_in_directory(data_path)
+    
+    return jsonify({'trainImagesCount': image_count})
     
     
 @app.route('/api/set_hyperparameters', methods=['POST'])
