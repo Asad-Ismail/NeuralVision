@@ -42,37 +42,6 @@ export class NewProjectComponent implements OnInit, OnDestroy
       reader.readAsDataURL(file);
     }
   }
-
-  // Input Images upload
-  async uploadImagesInChunks() {
-    this.uploadInProgress = true;
-    this.uploadProgress = 0;
-    const chunkSize = 10; // Number of images to upload in each chunk
-    const imageInput = document.getElementById('imageInput') as HTMLInputElement;
-  
-    if (imageInput.files) {
-      const files = Array.from(imageInput.files);
-  
-      for (let i = 0; i < files.length; i += chunkSize) {
-        const formData = new FormData();
-        const chunk = files.slice(i, i + chunkSize);
-  
-        for (const file of chunk) {formData.append('images', file);}
-  
-        try {
-          const response = await this.http.post('http://localhost:5000/api/uploadimages', formData).toPromise();
-          console.log(response);
-        } catch (error) {
-          console.error('Upload failed for chunk', error);
-          // Handle the upload failure (retry or inform the user)
-        }
-      }
-      this.imagesUploaded = true;
-      // When the upload is completed
-      this.uploadInProgress = false;
-    }
-    
-  }
   
   reset() {
     this.logs = '';
@@ -115,8 +84,6 @@ export class NewProjectComponent implements OnInit, OnDestroy
   public lineChartType: 'line' = 'line';
   public lineChartPlugins = [];
   public trainingStatus: string = '';
-  uploadInProgress = false;
-  uploadProgress = 0;
   showSteps = false;
   dataPath: string = '';
   trainImagesCount: number | null = null;
@@ -137,7 +104,7 @@ export class NewProjectComponent implements OnInit, OnDestroy
         const response: any = await this.http.post('http://localhost:5000/api/ssl_uploaddata', requestData).toPromise();
         console.log(response);
         // Get the number of train images and labels from the response
-        const trainImagesCount = response.trainImagesCount;
+        this.trainImagesCount = response.trainImagesCount; // <- Set the property
         // Display the counts on the front end or use them as needed
       } catch (error) {
         console.error('Sending data to backend failed', error);
