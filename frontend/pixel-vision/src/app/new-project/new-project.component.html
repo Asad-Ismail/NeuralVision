@@ -19,15 +19,11 @@
             <input [ngModel]="dataPath" (ngModelChange)="onDataPathChange($event)" id="dataPath" type="text" placeholder="Images path: ">
           </div>
 
-          
-
+          <!-- With this -->
           <div class="button-wrapper">
-            <div class="button-container">
-              <button type="button" class="btn-excite" (click)="submitDataPath()">Submit Path</button>
-            </div>
+            <button type="button" class="btn-excite" (click)="submitDataPath()">Submit Path</button>
           </div>
           
-
           <!-- Add this div after the input for the data path -->
           <div class="info-container" *ngIf="trainImagesCount !== null">
             <p>Number of train images: {{ trainImagesCount }}</p>
