@@ -4,6 +4,8 @@ import { ChartDataset, ChartOptions } from 'chart.js';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import io from 'socket.io-client';
 import { Router } from '@angular/router';
+import { HostListener } from '@angular/core';
+
 
 
 @Component({
@@ -31,7 +33,18 @@ export class NewProjectComponent implements OnInit, OnDestroy
     await this.sendDataToBackend();
   }
 
-  
+  @HostListener('window:beforeunload', ['$event'])
+  unloadHandler(event: Event) {
+    this.ngOnDestroy();
+    event.returnValue = true;
+  }
+
+  @HostListener('window:unload', ['$event'])
+  unloadHandlerOnClose(event: Event) {
+    this.ngOnDestroy();
+    event.returnValue = true;
+  }
+
   reset() {
     this.logs = '';
     this.metrics = [];
@@ -57,6 +70,13 @@ export class NewProjectComponent implements OnInit, OnDestroy
       }
     );  
   }  
+
+  stopTraining() {
+    const headers = new Headers({ 'Content-Type': 'application/json' });
+    const blob = new Blob([JSON.stringify({ stopTraining: true })], { type: 'application/json' });
+    navigator.sendBeacon('http://localhost:5000/api/stop_training', blob);
+  }
+  
 
   public lineChartData: ChartDataset[] = [
     {
@@ -138,6 +158,9 @@ export class NewProjectComponent implements OnInit, OnDestroy
       this.metrics.push(metric);
       this.updateChartData(metric);
     });
+
+    // stop training if running intially
+    this.stopTraining();
 
     // Periodically update the status
     setInterval(() => {
