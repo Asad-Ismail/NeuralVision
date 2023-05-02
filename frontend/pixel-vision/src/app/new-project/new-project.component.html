@@ -15,14 +15,19 @@
           <h3>Step 1: Select Training Dataset</h3>
 
           <div class="input-container">
-            <label for="imagePath">Images Path</label>
+            <label for="imagePath" class="bold-label" >Images Path </label>
             <input [ngModel]="dataPath" (ngModelChange)="onDataPathChange($event)" id="dataPath" type="text" placeholder="Images path: ">
           </div>
 
-          <!-- Add this button after the input for the data path -->
-          <div class="button-container">
-            <button type="button" class="btn-excite" (click)="submitDataPath()">Submit Path</button>
+          
+
+          <div class="button-wrapper">
+            <div class="button-container">
+              <button type="button" class="btn-excite" (click)="submitDataPath()">Submit Path</button>
+            </div>
           </div>
+          
+
           <!-- Add this div after the input for the data path -->
           <div class="info-container" *ngIf="trainImagesCount !== null">
             <p>Number of train images: {{ trainImagesCount }}</p>
@@ -76,11 +81,6 @@
           <div class="button-container">
             <button (click)="startTraining()" class="btn-excite">Start Training</button>
           </div>
-
-          <!-- Reset Button -->
-          <div class="reset-button-container">
-            <button type="button" class="btn-reset" (click)="reset()">Reset</button>
-          </div>
         </div>
       </div>
     </div>
@@ -101,11 +101,19 @@
     </canvas>
   </div>
 
-  <!-- Status Bar -->
-  <div class="status-bar-container" *ngIf="showSteps">
-    <div class="status-bar">
-      {{ trainingStatus }}
+
+<!-- Status Card -->
+<div class="custom-status-card-container" *ngIf="showSteps">
+  <div class="custom-card text-center">
+    <div class="custom-card-header">
+      Training Status
+    </div>
+    <div class="custom-card-body">
+      <h5 class="custom-card-title">{{ trainingStatus }}</h5>
     </div>
   </div>
+</div>
+
+
 
 </div>

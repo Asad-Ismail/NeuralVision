@@ -1,3 +1,4 @@
+
 body {
   font-family: 'Arial', sans-serif;
   background-color: #f5f5f5;
@@ -246,5 +247,48 @@ h1, h3 {
   margin-left: 0.5rem;
   margin-right: 0.5rem;
 }
+
+.custom-status-card-container {
+  margin: 20px 0;
+}
+
+.custom-card {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.text-center {
+  text-align: center;
+}
+
+.custom-card-header {
+  background-color: #f5f5f5;
+  border-bottom: 1px solid #ccc;
+  padding: 10px;
+  font-weight: bold;
+}
+
+.custom-card-body {
+  padding: 20px;
+}
+
+.custom-card-title {
+  margin: 0;
+}
+
+.bold-label {
+  font-weight: bold;
+  margin-right: 4px;
+}
+
+.button-wrapper {
+  display: flex;
+  justify-content: center;
+}
+
+
+
+
 
 
