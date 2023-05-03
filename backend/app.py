@@ -23,14 +23,20 @@ app.config['UPLOAD_FOLDER'] = 'static/uploads'
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 
-#log = logging.getLogger('werkzeug')
-#log.setLevel(logging.DEBUG)
 
-#class NoAccessLogFilter(logging.Filter):
-#    def filter(self, record):
-#        return record.levelno >= logging.WARNING
+class NoAccessLogFilter(logging.Filter):
+    def filter(self, record):
+        return record.levelno >= logging.DEBUG
 
-#log.addFilter(NoAccessLogFilter())
+class CustomLogFilter(logging.Filter):
+    def filter(self, record):
+        # Only allow messages that do NOT contain the specific message format
+        return not (record.levelname == 'INFO' and 'GET /api/status HTTP' in record.msg)
+
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.DEBUG)
+log.addFilter(NoAccessLogFilter())
+log.addFilter(CustomLogFilter())
 
 status = None
 process = None
