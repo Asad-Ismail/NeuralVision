@@ -98,7 +98,7 @@ export class NewProjectComponent implements OnInit, OnDestroy
   public lineChartLegend = true;
   public lineChartType: 'line' = 'line';
   public lineChartPlugins = [];
-  
+
   public trainingStatus: string = '';
   
   showSteps = false;
@@ -190,7 +190,7 @@ export class NewProjectComponent implements OnInit, OnDestroy
   startTraining() {
     this.trainingStarted = true;
     this.http.get('http://localhost:5000/api/start_training').subscribe((data: any) => {
-      //console.log(data.message);
+    console.log(data.message);
     });
   }
 

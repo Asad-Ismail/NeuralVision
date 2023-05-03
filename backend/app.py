@@ -1,5 +1,5 @@
-import eventlet
-eventlet.monkey_patch()
+#import eventlet
+#eventlet.monkey_patch()
 from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit
@@ -23,14 +23,14 @@ app.config['UPLOAD_FOLDER'] = 'static/uploads'
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 
-log = logging.getLogger('werkzeug')
-log.setLevel(logging.DEBUG)
+#log = logging.getLogger('werkzeug')
+#log.setLevel(logging.DEBUG)
 
-class NoAccessLogFilter(logging.Filter):
-    def filter(self, record):
-        return record.levelno >= logging.WARNING
+#class NoAccessLogFilter(logging.Filter):
+#    def filter(self, record):
+#        return record.levelno >= logging.WARNING
 
-log.addFilter(NoAccessLogFilter())
+#log.addFilter(NoAccessLogFilter())
 
 status = None
 process = None
@@ -169,4 +169,7 @@ def get_status():
     return jsonify({'status': log}), 200
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True, async_mode='eventlet')
+    app.debug = True
+    socketio.run(app, debug=True)
+
+

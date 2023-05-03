@@ -18,7 +18,7 @@ def train():
     # Simulate training by generating random loss values
     for epoch in range(1, 30):
         loss = 1- epoch / 10
-        metric = {'epoch': epoch, 'train_loss': loss, 'val_loss':loss+np.random.randn(1)}
+        metric = {'epoch': epoch, 'train_loss': loss, 'val_loss':loss+int(np.random.randn(1))}
         with open('training_data.json', 'a') as f:
             f.write(json.dumps(metric) + '\n')
         time.sleep(1)
