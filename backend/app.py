@@ -13,7 +13,7 @@ from watchdog.events import FileSystemEventHandler
 import logging
 import signal
 import os
-from werkzeug.utils import secure_filename
+from flask.logging import default_handler
 
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "*"}})
@@ -23,20 +23,15 @@ app.config['UPLOAD_FOLDER'] = 'static/uploads'
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 
-
 class NoAccessLogFilter(logging.Filter):
     def filter(self, record):
-        return record.levelno >= logging.DEBUG
-
-class CustomLogFilter(logging.Filter):
-    def filter(self, record):
-        # Only allow messages that do NOT contain the specific message format
-        return not (record.levelname == 'INFO' and 'GET /api/status HTTP' in record.msg)
+        if record.levelname == 'INFO' and 'GET /api/status HTTP' in record.getMessage():
+            return False
+        return True
 
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.DEBUG)
 log.addFilter(NoAccessLogFilter())
-log.addFilter(CustomLogFilter())
 
 status = None
 process = None
@@ -166,13 +161,14 @@ def stop_training():
 
 @app.route('/api/status', methods=['GET'])
 def get_status():
+    global status
     if status == None:
-        log = "Training Not Started/Stopped"
+        msg = "Training Not Started/Stopped"
     elif status == 'Training':
-        log = "Training!!"
+        msg = "Training!!"
     elif status == "Done":
-        log = "Done!!"
-    return jsonify({'status': log}), 200
+        msg = "Done!!"
+    return jsonify({'status': msg}), 200
 
 if __name__ == '__main__':
     app.debug = True
