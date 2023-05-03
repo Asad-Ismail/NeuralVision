@@ -6,3 +6,5 @@ torchvision
 timm
 pytorch-lightning
 pycocotools
+eventlet
+

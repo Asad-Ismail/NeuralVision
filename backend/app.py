@@ -1,3 +1,5 @@
+import eventlet
+eventlet.monkey_patch()
 from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit
@@ -13,14 +15,22 @@ import signal
 import os
 from werkzeug.utils import secure_filename
 
-logging.basicConfig(level=logging.DEBUG)
-
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 socketio = SocketIO(app, cors_allowed_origins="*")
 app.config['UPLOAD_FOLDER'] = 'static/uploads'  
 # Create the directory and its parent directories if they don't exist
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.DEBUG)
+
+class NoAccessLogFilter(logging.Filter):
+    def filter(self, record):
+        return record.levelno >= logging.WARNING
+
+log.addFilter(NoAccessLogFilter())
 
 status = None
 process = None
@@ -159,4 +169,4 @@ def get_status():
     return jsonify({'status': log}), 200
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True)
+    socketio.run(app, debug=True, async_mode='eventlet')
