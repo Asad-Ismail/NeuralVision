@@ -209,7 +209,4 @@ export class NewProjectComponent implements OnInit, OnDestroy
     });
   }
 
-  
-
-
 }
