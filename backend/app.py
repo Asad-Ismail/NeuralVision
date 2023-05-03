@@ -113,12 +113,15 @@ def set_hyperparameters():
 def start_training():
     global status, training_thread
     if training_thread and training_thread.is_alive():
+        logging.info("Training is already started!!")
         return jsonify({'message': 'Training is already running'}), 200
 
+    logging.info("Trying to start training!!")
     training_thread = threading.Thread(target=start_training_thread)
     training_thread.start()
     read_metrics_from_file(socketio)
     status = "Training"
+    logging.info("Training started!!")
     return jsonify({'message': 'Training started'}), 200
 
 

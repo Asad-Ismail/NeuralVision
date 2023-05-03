@@ -82,17 +82,25 @@ export class NewProjectComponent implements OnInit, OnDestroy
     {
       data: [],
       label: 'Training Loss',
-      borderColor: 'black',
-      backgroundColor: 'rgba(255,0,0,0.3)',
+      borderColor: 'blue',
+      backgroundColor: 'rgba(0, 0, 255, 0.1)',
+    },
+    {
+      data: [],
+      label: 'Validation Loss',
+      borderColor: 'red',
+      backgroundColor: 'rgba(255, 0, 0, 0.1)',
     },
   ];
-
+  
   public lineChartLabels: string[] = [];
-  public lineChartOptions: ChartOptions = { responsive: true};
+  public lineChartOptions: ChartOptions = { responsive: true };
   public lineChartLegend = true;
   public lineChartType: 'line' = 'line';
   public lineChartPlugins = [];
+  
   public trainingStatus: string = '';
+  
   showSteps = false;
   dataPath: string = '';
   trainImagesCount: number | null = null;
@@ -198,9 +206,10 @@ export class NewProjectComponent implements OnInit, OnDestroy
   
 
   updateChartData(metric: any) {
-    // Assuming your metric object has a property called "loss" and another called "epoch"
+    // Assuming your metric object has properties called "train_loss", "val_loss", and "epoch"
     console.log(metric);
-    (this.lineChartData[0].data as number[]).push(metric.loss);
+    (this.lineChartData[0].data as number[]).push(metric.train_loss);
+    (this.lineChartData[1].data as number[]).push(metric.val_loss);
     this.lineChartLabels.push(metric.epoch.toString());
     // Use the ngZone service to update the chart in the Angular zone
     this.ngZone.run(() => {
@@ -208,5 +217,6 @@ export class NewProjectComponent implements OnInit, OnDestroy
       this.lineChartLabels = [...this.lineChartLabels];
     });
   }
+  
 
 }
