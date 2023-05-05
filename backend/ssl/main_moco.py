@@ -37,7 +37,8 @@ model_names = sorted(
     if name.islower() and not name.startswith("__") and callable(models.__dict__[name])
 )
 
-parser = argparse.ArgumentParser(description="PyTorch ImageNet Training")
+parser = argparse.ArgumentParser(description="PyTorch Training")
+
 parser.add_argument("data",default="/home/asad/Downloads/Balloons.v15i.coco-segmentation/train/images",
                     metavar="DIR", help="path to dataset")
 parser.add_argument(
@@ -51,13 +52,16 @@ parser.add_argument(
 parser.add_argument(
     "-j",
     "--workers",
-    default=32,
+    default=4,
     type=int,
     metavar="N",
     help="number of data loading workers (default: 32)",
 )
 parser.add_argument(
     "--epochs", default=200, type=int, metavar="N", help="number of total epochs to run"
+)
+parser.add_argument(
+    "--save-inter", default=10, type=int, metavar="N", help="number of total epochs to run"
 )
 parser.add_argument(
     "--start-epoch",
@@ -125,9 +129,8 @@ parser.add_argument(
     type=int,
     help="number of nodes for distributed training",
 )
-parser.add_argument(
-    "--seed", default=42, type=int, help="seed for initializing training. "
-)
+parser.add_argument("--seed", default=42, type=int, help="seed for initializing training.")
+parser.add_argument("--output_path", default="checkpoints", type=str, help="output path for checkpointing")
 parser.add_argument("--gpu", default=0, type=int, help="GPU id to use.")
 parser.add_argument(
     "--multiprocessing-distributed",
@@ -162,8 +165,16 @@ parser.add_argument("--aug-plus", action="store_true", help="use moco v2 data au
 parser.add_argument("--cos", action="store_true", help="use cosine lr schedule")
 
 
+is_best=False
+top_acc=-1
+
+
 def main():
+    global is_best
+    global top_acc
+    
     args = parser.parse_args()
+    os.makedirs(args.output_path, exist_ok=True)
 
     if args.seed is not None:
         random.seed(args.seed)
@@ -289,9 +300,7 @@ def main():
         # train for one epoch
         train(train_loader, model, criterion, optimizer, epoch, args)
 
-        if not args.multiprocessing_distributed or (
-            args.multiprocessing_distributed and args.rank % ngpus_per_node == 0
-        ):
+        if not args.multiprocessing_distributed and epoch%args.save_inter==1 or epoch==args.epochs-1:
             save_checkpoint(
                 {
                     "epoch": epoch + 1,
@@ -299,12 +308,15 @@ def main():
                     "state_dict": model.state_dict(),
                     "optimizer": optimizer.state_dict(),
                 },
-                is_best=False,
-                filename="checkpoint_{:04d}.pth.tar".format(epoch),
+                is_best=is_best,
+                filename=os.path.join(args.output_path,"checkpoint_{:04d}.pth.tar".format(epoch)),
             )
 
 
 def train(train_loader, model, criterion, optimizer, epoch, args):
+    global is_best
+    global top_acc
+    
     batch_time = AverageMeter("Time", ":6.3f")
     data_time = AverageMeter("Data", ":6.3f")
     losses = AverageMeter("Loss", ":.4e")
@@ -334,6 +346,12 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
         # acc1/acc5 are (K+1)-way contrast classifier accuracy
         # measure accuracy and record loss
         acc1, acc5 = accuracy(output, target, topk=(1, 5))
+        # update best accuracy
+        if acc5>top_acc:
+            top_acc=acc5
+            is_best=True
+        else:
+            is_best=False
         losses.update(loss.item(), images[0].size(0))
         top1.update(acc1[0], images[0].size(0))
         top5.update(acc5[0], images[0].size(0))

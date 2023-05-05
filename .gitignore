@@ -5,3 +5,5 @@
 *.pyc
 */lightning_logs/*
 *.vscode/*
+*images/*
+*/*images*
