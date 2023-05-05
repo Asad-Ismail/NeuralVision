@@ -300,7 +300,7 @@ def main():
         # train for one epoch
         train(train_loader, model, criterion, optimizer, epoch, args)
 
-        if not args.multiprocessing_distributed and epoch%args.save_inter==1 or epoch==args.epochs-1:
+        if not args.multiprocessing_distributed and epoch%args.save_inter==0 or epoch==args.epochs-1:
             save_checkpoint(
                 {
                     "epoch": epoch + 1,
@@ -309,7 +309,7 @@ def main():
                     "optimizer": optimizer.state_dict(),
                 },
                 is_best=is_best,
-                filename=os.path.join(args.output_path,"checkpoint_{:04d}.pth.tar".format(epoch)),
+                filename=os.path.join(args.output_path,"checkpoint_{:04d}.pth".format(epoch)),
             )
 
 
