@@ -243,8 +243,8 @@ class LossEvalHook(HookBase):
             
         if is_final or (self._period > 0 and next_iter % self._period == 0):
             self._do_loss_eval()
-            logger.logging.info(f"Validation Bbox AP {self.trainer.storage.history("bbox/AP").latest()}")
-            logger.logging.info(f"Validation Segmentation AP {self.trainer.storage.history("segm/AP").latest()}")
+            logger.logging.info(f"Validation Bbox AP {self.trainer.storage.history('bbox/AP').latest()}")
+            logger.logging.info(f"Validation Segmentation AP {self.trainer.storage.history('segm/AP').latest()}")
             self.vis_images()
 
 
