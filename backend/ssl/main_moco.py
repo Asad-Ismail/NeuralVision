@@ -58,10 +58,10 @@ parser.add_argument(
     help="number of data loading workers (default: 32)",
 )
 parser.add_argument(
-    "--epochs", default=200, type=int, metavar="N", help="number of total epochs to run"
+    "--epochs", default=2000, type=int, metavar="N", help="number of total epochs to run"
 )
 parser.add_argument(
-    "--save-inter", default=10, type=int, metavar="N", help="number of total epochs to run"
+    "--save-inter", default=500, type=int, metavar="N", help="number of total epochs to run"
 )
 parser.add_argument(
     "--start-epoch",
@@ -73,7 +73,7 @@ parser.add_argument(
 parser.add_argument(
     "-b",
     "--batch-size",
-    default=32,
+    default=64,
     type=int,
     metavar="N",
     help="mini-batch size (default: 256), this is the total "
@@ -309,7 +309,7 @@ def main():
                     "optimizer": optimizer.state_dict(),
                 },
                 is_best=is_best,
-                filename=os.path.join(args.output_path,"checkpoint_{:04d}.pth".format(epoch)),
+                filename=os.path.join(args.output_path,"checkpoint_{:04d}.pth".format(epoch),out_dir=args.output_path),
             )
 
 
@@ -370,10 +370,10 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
 
 
 
-def save_checkpoint(state, is_best, filename="checkpoint.pth.tar"):
+def save_checkpoint(state, is_best, filename="checkpoint.pth.tar",out_dir="."):
     torch.save(state, filename)
     if is_best:
-        shutil.copyfile(filename, "model_best.pth.tar")
+        shutil.copyfile(filename, os.path.join("model_best.pth"))
 
 
 class AverageMeter(object):

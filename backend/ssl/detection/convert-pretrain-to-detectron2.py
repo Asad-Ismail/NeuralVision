@@ -19,10 +19,10 @@ if __name__ == "__main__":
 
     newmodel = {}
     for k, v in obj.items():
-        if not k.startswith("module.encoder_q."):
+        if not k.startswith("encoder_q."):
             continue
         old_k = k
-        k = k.replace("module.encoder_q.", "")
+        k = k.replace("encoder_q.", "")
         if "layer" not in k:
             k = "stem." + k
         for t in [1, 2, 3, 4]:
@@ -36,5 +36,6 @@ if __name__ == "__main__":
 
     res = {"model": newmodel, "__author__": "MOCO", "matching_heuristics": True}
 
-    with open(sys.argv[2], "wb") as f:
-        pkl.dump(res, f)
+    #with open(sys.argv[2], "wb") as f:
+    #    pkl.dump(res, f)
+    torch.save(res,sys.argv[2])
