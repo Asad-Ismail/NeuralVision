@@ -4,6 +4,7 @@ import { ChartDataset, ChartOptions } from 'chart.js';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import io from 'socket.io-client';
 import { Router } from '@angular/router';
+import { HostListener } from '@angular/core';
 
 
 @Component({
@@ -15,6 +16,7 @@ import { Router } from '@angular/router';
 
 export class InstanceSegmentationComponent implements OnInit, OnDestroy{
 
+
   logs: string = '';
   metrics: any[] = [];
   trainingStarted: boolean = false;
@@ -23,40 +25,26 @@ export class InstanceSegmentationComponent implements OnInit, OnDestroy{
   // Add a new property to check if hyperparameters have been submitted
   hyperparametersSubmitted: boolean = false;
   private socket: any;
-  dataPath: string = '';
-  trainImagesCount: number | null = null;
-  trainlabelsCount: number | null = null;
-  valImagesCount: number | null = null;
-  vallabelsCount: number | null = null;
 
+  imagePreviews: string[] = [];
+  imagesUploaded = false;
 
-  onDataPathChange(value: string) {
-    this.dataPath = value;
+  async submitDataPath() {
+    await this.sendDataToBackend();
   }
-  
 
-  async sendDataToBackend() {
-    if (this.dataPath) {
-      const requestData = {
-        dataPath: this.dataPath,
-      };
-  
-      try {
-        const response: any = await this.http.post('http://localhost:5000/api/instance_segmentation_uploaddata', requestData).toPromise();
-        console.log(response);
-        // Get the number of train images and labels from the response
-        const trainImagesCount = response.trainImagesCount;
-        const labelsCount = response.labelsCount;
-        const valImagesCount = response.valImagesCount;
-        const vallabelsCount = response.vallabelsCount;
-        // Display the counts on the front end or use them as needed
-      } catch (error) {
-        console.error('Sending data to backend failed', error);
-        // Handle the failure (retry or inform the user)
-      }
-    }
+  @HostListener('window:beforeunload', ['$event'])
+  unloadHandler(event: Event) {
+    this.ngOnDestroy();
+    event.returnValue = true;
   }
-  
+
+  @HostListener('window:unload', ['$event'])
+  unloadHandlerOnClose(event: Event) {
+    this.ngOnDestroy();
+    event.returnValue = true;
+  }
+
   reset() {
     this.logs = '';
     this.metrics = [];
@@ -83,25 +71,64 @@ export class InstanceSegmentationComponent implements OnInit, OnDestroy{
     );  
   }  
 
+  stopTraining() {
+    const headers = new Headers({ 'Content-Type': 'application/json' });
+    const blob = new Blob([JSON.stringify({ stopTraining: true })], { type: 'application/json' });
+    navigator.sendBeacon('http://localhost:5000/api/stop_training', blob);
+  }
+  
 
   public lineChartData: ChartDataset[] = [
     {
       data: [],
       label: 'Training Loss',
-      borderColor: 'black',
-      backgroundColor: 'rgba(255,0,0,0.3)',
+      borderColor: 'blue',
+      backgroundColor: 'rgba(0, 0, 255, 0.1)',
+    },
+    {
+      data: [],
+      label: 'Validation Loss',
+      borderColor: 'red',
+      backgroundColor: 'rgba(255, 0, 0, 0.1)',
     },
   ];
-
+  
   public lineChartLabels: string[] = [];
-  public lineChartOptions: ChartOptions = { responsive: true};
+  public lineChartOptions: ChartOptions = { responsive: true };
   public lineChartLegend = true;
   public lineChartType: 'line' = 'line';
   public lineChartPlugins = [];
+
   public trainingStatus: string = '';
-  uploadInProgress = false;
-  uploadProgress = 0;
+  
   showSteps = false;
+  dataPath: string = '';
+  trainImagesCount: number | null = null;
+
+
+  onDataPathChange(value: string) {
+    this.dataPath = value;
+  }
+  
+
+  async sendDataToBackend() {
+    if (this.dataPath) {
+      const requestData = {
+        dataPath: this.dataPath,
+      };
+  
+      try {
+        const response: any = await this.http.post('http://localhost:5000/api/ssl_uploaddata', requestData).toPromise();
+        console.log(response);
+        // Get the number of train images and labels from the response
+        this.trainImagesCount = response.trainImagesCount; // <- Set the property
+        // Display the counts on the front end or use them as needed
+      } catch (error) {
+        console.error('Sending data to backend failed', error);
+        // Handle the failure (retry or inform the user)
+      }
+    }
+  }
 
   constructor(private http: HttpClient, private ngZone: NgZone,private router: Router) 
   
@@ -140,6 +167,9 @@ export class InstanceSegmentationComponent implements OnInit, OnDestroy{
       this.updateChartData(metric);
     });
 
+    // stop training if running intially
+    this.stopTraining();
+
     // Periodically update the status
     setInterval(() => {
       this.http.get('http://localhost:5000/api/status').subscribe((data: any) => {
@@ -160,7 +190,7 @@ export class InstanceSegmentationComponent implements OnInit, OnDestroy{
   startTraining() {
     this.trainingStarted = true;
     this.http.get('http://localhost:5000/api/start_training').subscribe((data: any) => {
-      //console.log(data.message);
+    console.log(data.message);
     });
   }
 
@@ -176,9 +206,10 @@ export class InstanceSegmentationComponent implements OnInit, OnDestroy{
   
 
   updateChartData(metric: any) {
-    // Assuming your metric object has a property called "loss" and another called "epoch"
+    // Assuming your metric object has properties called "train_loss", "val_loss", and "epoch"
     console.log(metric);
-    (this.lineChartData[0].data as number[]).push(metric.loss);
+    (this.lineChartData[0].data as number[]).push(metric.train_loss);
+    (this.lineChartData[1].data as number[]).push(metric.val_loss);
     this.lineChartLabels.push(metric.epoch.toString());
     // Use the ngZone service to update the chart in the Angular zone
     this.ngZone.run(() => {

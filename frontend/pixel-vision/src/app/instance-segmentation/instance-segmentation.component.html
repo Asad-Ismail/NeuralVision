@@ -1,113 +1,114 @@
 <div class="container">
-    <div class="intro">
-      <!-- Header -->
-      <div class="header-container">
-        <h1>Train Instance Segmentation Model</h1>
-      </div>
-      <div class="header-buttons">
-        <button type="button" class="btn-excite btn-continue" (click)="continueProcess()">Continue</button>
-        <button type="button" class="btn-excite btn-skip" (click)="skipProcess()">Skip</button>
-      </div>
-      <div class="steps-container" *ngIf="showSteps">
-        <div class="steps-wrapper">
-          <!-- Step 1: Select Training Dataset -->
-          <div class="step-container">
-            <h3>Step 1: Select Training Dataset</h3>
-            <div class="input-container">
-              <label for="imagePath">Image Directory Path</label>
-              <input [ngModel]="dataPath" (ngModelChange)="onDataPathChange($event)" id="dataPath" type="text" placeholder="Enter image directory path">
-            </div>
-            <!-- Add this div after the input for the data path -->
-          <div class="info-container" *ngIf="trainImagesCount !== null && trainlabelsCount !== null">
-            <p>Number of train images: {{ trainImagesCount }}</p>
-            <p>Number of train labels: {{ trainlabelsCount }}</p>
-            <p>Number of val images: {{ valImagesCount }}</p>
-            <p>Number of val labels: {{ vallabelsCount }}</p>
+  <div class="intro">
+    <!-- Header -->
+    <div class="header-container">
+      <h1>Train Instance Segmentation Model</h1>
+    </div>
+    <div class="header-buttons">
+      <button type="button" class="btn-excite btn-continue" (click)="continueProcess()">Continue</button>
+      <button type="button" class="btn-excite btn-skip" (click)="skipProcess()">Skip (Self SuperVision)</button>
+    </div>
+    <div class="steps-container" *ngIf="showSteps">
+      <div class="steps-wrapper">
+        <!-- Step 1: Select Training Dataset -->
+        <div class="step-container">
+          <h3>Step 1: Select Training Dataset</h3>
+
+          <div class="input-container">
+            <label for="imagePath" class="bold-label" >Images Path </label>
+            <input [ngModel]="dataPath" (ngModelChange)="onDataPathChange($event)" id="dataPath" type="text" placeholder="Images path: ">
           </div>
 
-          <!-- Reset Button -->
-          <div class="reset-button-container">
-            <button type="button" class="btn-reset" (click)="reset()">Reset</button>
+          <!-- With this -->
+          <div class="button-wrapper">
+            <button type="button" class="btn-excite" (click)="submitDataPath()">Submit Path</button>
           </div>
-  
-          <!-- Step 2: Configure Hyperparameters -->
-          <ng-container >
-            <div class="step-container">
-              <h3>Step 2: Configure Hyperparameters</h3>
+          
+          <!-- Add this div after the input for the data path -->
+          <div class="info-container" *ngIf="trainImagesCount !== null">
+            <p>Number of train images: {{ trainImagesCount }}</p>
+          </div>
+        </div>
+
+        <!-- Step 2: Configure Hyperparameters -->
+        <ng-container *ngIf="trainImagesCount">
+          <div class="step-container">
+            <h3>Step 2: Configure Hyperparameters</h3>
+          </div>
+
+          <!-- Hyperparameters Form -->
+          <form [formGroup]="hyperparametersForm" (ngSubmit)="submitHyperparameters()">
+            <div class="form-row">
+              <label for="learningRate">Learning Rate</label>
+              <input formControlName="learningRate" id="learningRate" type="number" min="0.0001" step="0.0001" required>
+
+              <label for="epochs">Epochs</label>
+              <input formControlName="epochs" id="epochs" type="number" min="1" step="1" required>
+
+              <label for="batchSize">Batch Size</label>
+              <input formControlName="batchSize" id="batchSize" type="number" min="1" step="1" required>
+
+              <label for="algorithmType">Algorithm Type</label>
+              <select formControlName="algorithmType" id="algorithmType" required>
+                <option value="">Select Algorithm</option>
+                <option value="MasKRCNN (Detectron2)">MOCO</option>
+              </select>
             </div>
-  
-            <!-- Hyperparameters Form -->
-            <form [formGroup]="hyperparametersForm" (ngSubmit)="submitHyperparameters()">
-              <div class="form-row">
-                <label for="learningRate">Learning Rate</label>
-                <input formControlName="learningRate" id="learningRate" type="number" min="0.0001" step="0.0001" required>
-  
-                <label for="epochs">Epochs</label>
-                <input formControlName="epochs" id="epochs" type="number" min="1" step="1" required>
-  
-                <label for="batchSize">Batch Size</label>
-                <input formControlName="batchSize" id="batchSize" type="number" min="1" step="1" required>
-  
-                <label for="algorithmType">Algorithm Type</label>
-                <select formControlName="algorithmType" id="algorithmType" required>
-                  <option value="">Select Algorithm</option>
-                  <option value="MaskRCNN">MOCO</option>
-                </select>
-                <!-- Add more form controls if needed -->
-              </div>
-              <!-- Submit Button -->
-              <div class="button-container">
-                <button type="submit" class="btn-excite">Submit HParameters</button>
-              </div>
-            </form>
-  
-            <!-- Reset Button -->
-            <div class="reset-button-container">
-              <button type="button" class="btn-reset" (click)="reset()">Reset</button>
-            </div>
-          </ng-container>
-  
-          <!-- Step 3: Start Training -->
-          <div class="training-section" *ngIf="hyperparametersSubmitted">
-            <div class="step-container">
-              <h3>Step 3: Start Training</h3>
-            </div>
-  
-            <!-- Start Training Button -->
+            <!-- Submit and Reset Buttons -->
             <div class="button-container">
-              <button (click)="startTraining()" class="btn-excite">Start Training</button>
-            </div>
-  
-            <!-- Reset Button -->
-            <div class="reset-button-container">
+              <button type="submit" class="btn-excite">Submit Hyperparameters</button>
               <button type="button" class="btn-reset" (click)="reset()">Reset</button>
-            </div>
+            </div>            
+          </form>
+        </ng-container>
+
+
+        <!-- Step 3: Start Training -->
+        <div class="training-section" *ngIf="hyperparametersSubmitted">
+          <div class="step-container">
+            <h3>Step 3: Start Training</h3>
           </div>
+
+          <!-- Start Training and Cancel Button -->
+          <!-- Submit and Reset Buttons -->
+          <div class="button-container">
+            <button (click)="startTraining()" class="btn-excite">Start Training</button>
+            <button type="button" class="btn-reset" (click)="reset()">Cancel Training</button>
+          </div>     
+          
         </div>
       </div>
     </div>
-  
-    <!-- Chart Container -->
-    <div *ngIf="trainingStarted" class="chart-container">
-      <canvas
-          width="1200" height="800" 
-          baseChart
-          [datasets]="lineChartData"
-          [labels]="lineChartLabels"
-          [options]="lineChartOptions"
-          [legend]="lineChartLegend"
-          [type]="lineChartType"
-          [plugins]="lineChartPlugins"
-      >
-      </canvas>
-    </div>
-  
-    <!-- Status Bar -->
-    <div class="status-bar-container" *ngIf="showSteps">
-      <div class="status-bar">
-        {{ trainingStatus }}
-      </div>
-    </div>
-  
   </div>
-  
+
+  <!-- Chart Container -->
+  <div *ngIf="trainingStarted" class="chart-container">
+    <canvas
+        width="1200" height="800" 
+        baseChart
+        [datasets]="lineChartData"
+        [labels]="lineChartLabels"
+        [options]="lineChartOptions"
+        [legend]="lineChartLegend"
+        [type]="lineChartType"
+        [plugins]="lineChartPlugins"
+    >
+    </canvas>
+  </div>
+
+
+<!-- Status Card -->
+<div class="custom-status-card-container" *ngIf="showSteps">
+  <div class="custom-card text-center">
+    <div class="custom-card-header">
+      Training Status
+    </div>
+    <div class="custom-card-body">
+      <h5 class="custom-card-title">{{ trainingStatus }}</h5>
+    </div>
+  </div>
+</div>
+
+
+
+</div>
